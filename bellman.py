@@ -37,11 +37,11 @@ def make_model(X, Y):
 sales_model = make_model(X, Y)
 
 T=20
-N=15
-price_range=np.arange(10, 20, 1) 
+N=5
+price_range=np.arange(10, 20, 0.1) 
 L=0.01
 delta=0.99
-Z=0.5
+Z=1
 
 competitor_prices = 10 + np.random.uniform(0, 10, 5)
 computed_values = {}
@@ -55,26 +55,33 @@ def rank(a, p):
 
 def _V(price, t, n):
     x = np.hstack((price, competitor_prices, rank(price, competitor_prices))).reshape(1, -1)
+    # sales_prob = round(sales_model(x)[0])
     sales_prob = sales_model(x)[0]
 
     _sum = 0
     # TODO: Check here
     # for i in range(2):
+
+    # print(sales_prob)
+
+    pi_sum = 0
     for i in range(int(poisson.ppf(0.9999, sales_prob)) + 1):
         pi = poisson.pmf(i, sales_prob)
+        pi_sum += pi
         today_profit = min(n, i) * price
         holding_costs = n * L
-        V_future, _ = V(t + 1, max(0, n - i))
+        _, V_future = V(t + 1, max(0, n - i))
         exp_future_profits = delta * V_future
         _sum += pi * (today_profit - holding_costs + exp_future_profits)
+    # print(pi_sum)
     return _sum
 
 def V(t, n):
     if (t,n) in computed_values:
         return computed_values[t,n]
     if t >= T:
-        computed_values[t,n] = (n * Z, 0)
-        return (n * Z, 0)
+        computed_values[t,n] = (0, n * Z)
+        return (0, n * Z)
     if n <= 0:
         computed_values[t,n] = (0, 0)
         return (0, 0)
@@ -94,9 +101,9 @@ V(0, N)
 
 print(computed_values)
 
-for i_n in range(N):
-    datapoints = [ computed_values[i_t, i_n] for i_t in range(T) if(i_t, i_n) in computed_values ]
-            
+for i_n in range(N + 1):
+    datapoints = [ computed_values[i_t, i_n][0] for i_t in range(T + 1) if(i_t, i_n) in computed_values ]
+    print(datapoints)
     plt.plot(datapoints)    
     plt.ylabel('N=' + str(i_n))
     plt.show()
