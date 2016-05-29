@@ -58,7 +58,9 @@ def _V(price, t, n):
     sales_prob = sales_model(x)[0]
 
     _sum = 0
-    for i in range(2):
+    # TODO: Check here
+    # for i in range(2):
+    for i in range(int(poisson.ppf(0.9999, sales_prob)) + 1):
         pi = poisson.pmf(i, sales_prob)
         today_profit = min(n, i) * price
         holding_costs = n * L
