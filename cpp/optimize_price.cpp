@@ -7,7 +7,7 @@
 #include "PriceOptimizer.cpp"
 using namespace boost::python;
 
-std::vector<double> ndarray_to_vector(numeric::array& l) {
+std::vector<double> ndarray_to_vector(const numeric::array& l) {
   std::vector<double> result;
   for (int i = 0; i < len(l); ++i) {
     double item = boost::python::extract<double>(l[i]);
@@ -16,13 +16,13 @@ std::vector<double> ndarray_to_vector(numeric::array& l) {
   return result;
 }
 
-void set_price_range(PriceOptimizer * self, numeric::array& l) {
+void set_price_range(PriceOptimizer* self, const numeric::array& l) {
   self->price_range = ndarray_to_vector(l);
 }
-void set_competitor_prices(PriceOptimizer * self, numeric::array& l) {
+void set_competitor_prices(PriceOptimizer* self, const numeric::array& l) {
   self->competitor_prices = ndarray_to_vector(l);
 }
-void set_sales_model_coef(PriceOptimizer * self, numeric::array& l) {
+void set_sales_model_coef(PriceOptimizer* self, const numeric::array& l) {
   self->sales_model_coef = ndarray_to_vector(l);
 }
 
@@ -35,7 +35,7 @@ tuple run(PriceOptimizer * self, int t, int n) {
 
 BOOST_PYTHON_MODULE(optimize_price)
 {
-  boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
+  numeric::array::set_module_and_type("numpy", "ndarray");
 
   class_<PriceOptimizer>("PriceOptimizer", init<int, int>())
     .def("run", &run)

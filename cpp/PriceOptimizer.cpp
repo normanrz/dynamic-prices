@@ -5,20 +5,24 @@
 #include <numeric>
 #include <iostream>
 
+using PricePair = std::pair<double, double>;
+template<class T> 
+using Grid = std::vector<std::vector<T>>;
 
 void print_vec(std::vector<double> vec) {
-  for(double value: vec) {
+  for(const double& value: vec) {
     std::cout << value << ' ';
   }
-  std::cout << '\n';
+  std::cout << std::endl;
 }
 
-void print_pair(std::pair<double, double> pair) {
-  std::cout << pair.first << ' ' << pair.second << '\n';
+void print_pair(PricePair pair) {
+  std::cout << pair.first << ' ' << pair.second << std::endl;
 }
 
 double dot_product(std::vector<double> a, std::vector<double> b) {
   double sum = 0;
+  
   for (int i = 0; i < std::min(a.size(), b.size()); i++) {
     sum += a[i] * b[i];
   }
@@ -29,7 +33,7 @@ double sigmoid(double a) {
   return 1.0 / (1.0 + std::exp(-a));
 }
 
-int rank(double price, std::vector<double> competitor_prices) {
+int rank(double price, const std::vector<double>& competitor_prices) {
   int rank = competitor_prices.size();
   for (int i = 0; i < competitor_prices.size(); i++) {
     if (price < competitor_prices[i]) {
@@ -57,10 +61,9 @@ unsigned int poisson_ppf(double mu, double q) {
   return i;
 }
 
-double predict_logistic_regression(std::vector<double> x, std::vector<double> coeff) {
+double predict_logistic_regression(const std::vector<double>& x, const std::vector<double>& coeff) {
   return sigmoid(dot_product(x, coeff));
 }
-
 
 class PriceOptimizer {
   public:
@@ -74,26 +77,26 @@ class PriceOptimizer {
     std::vector<double> price_range = {};
     std::vector<double> competitor_prices = {};
     std::vector<double> sales_model_coef = {};
-    std::pair<double, double> run(int, int);
+    PricePair run(int, int);
 
   private:
-    std::vector< std::pair<double, double> > cache;
-    static std::pair<double, double> cache_default;
+    Grid<PricePair> cache;
+    static PricePair cache_default;
 
     double _V(double, int, int);
-    std::pair<double, double> V_impl(int, int);
-    std::pair<double, double> V(int, int);
+    PricePair V_impl(int, int);
+    PricePair V(int, int);
     double sales_model(double, int);
 };
 
-std::pair<double, double> PriceOptimizer::cache_default = 
-  std::make_pair<double, double>(-100000, -100000);
+PricePair PriceOptimizer::cache_default = 
+  std::make_pair(-100000., -100000.);
 
-PriceOptimizer::PriceOptimizer(int T, int N) {
-  this->T = T;
-  this->N = N;
-  cache = std::vector< std::pair<double, double> >((T + 1) * (N + 1));
-  std::fill(cache.begin(), cache.end(), cache_default);
+PriceOptimizer::PriceOptimizer(int T, int N) : T(T), N(N) {
+  std::vector<PricePair> cache_list(T + 1);
+  std::fill(cache_list.begin(), cache_list.end(), cache_default);
+  cache = Grid<PricePair>(N + 1);
+  std::fill(cache.begin(), cache.end(), cache_list);
 }
 
 double PriceOptimizer::_V(double price, int t, int n) {
@@ -114,7 +117,7 @@ double PriceOptimizer::_V(double price, int t, int n) {
   return sum;
 }
 
-std::pair<double, double> PriceOptimizer::V_impl(int t, int n) {
+PricePair PriceOptimizer::V_impl(int t, int n) {
   if (t >= T) {
     return std::make_pair(0, n * Z);
   }
@@ -122,7 +125,7 @@ std::pair<double, double> PriceOptimizer::V_impl(int t, int n) {
     return std::make_pair(0, 0);
   }
 
-  std::pair<double, double> price_opt_pair;
+  PricePair price_opt_pair;
 
   for (double price: price_range) {
     double v = _V(price, t, n);
@@ -133,13 +136,13 @@ std::pair<double, double> PriceOptimizer::V_impl(int t, int n) {
   return price_opt_pair;
 }
 
-std::pair<double, double> PriceOptimizer::V(int t, int n) {
-  if (cache[t + (T + 1) * n] != cache_default) {
-    return cache[t + (T + 1) * n];
+PricePair PriceOptimizer::V(int t, int n) {
+  if (cache[t][n] != cache_default) {
+    return cache[t][n];
   }
 
-  std::pair<double, double> price_pair = V_impl(t, n);
-  cache[t + (T + 1) * n] = price_pair;
+  PricePair price_pair = V_impl(t, n);
+  cache[t][n] = price_pair;
   
   // printf("%d %d %f %f\n", t, n, price_pair.first, price_pair.second);
   return price_pair;
