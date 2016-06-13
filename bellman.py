@@ -43,7 +43,8 @@ L=0.01
 delta=0.99
 Z=1
 
-competitor_prices = 10 + np.random.uniform(0, 10, 5)
+# competitor_prices = 10 + np.random.uniform(0, 10, 5)
+competitor_prices = np.array([14, 15, 16, 17, 18])
 computed_values = {}
 
 def rank(a, p):
@@ -104,8 +105,11 @@ print(computed_values)
 for i_n in range(N + 1):
     datapoints = [ computed_values[i_t, i_n][0] for i_t in range(T + 1) if(i_t, i_n) in computed_values ]
     print(datapoints)
-    plt.plot(datapoints)    
-    plt.ylabel('N=' + str(i_n))
+    label_text = 'N=' + str(i_n)
+    plt.plot(datapoints, label=label_text)    
+    plt.ylabel('n')
+    plt.xlabel('T')
+    plt.legend()
     plt.show()
 
 
