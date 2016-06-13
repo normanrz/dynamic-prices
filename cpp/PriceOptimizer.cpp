@@ -2,9 +2,38 @@
 #include <utility>
 #include <algorithm>
 #include <cmath>
+#include <numeric>
+#include <iostream>
 
+using PricePair = std::pair<double, double>;
+template<class T> 
+using Grid = std::vector<std::vector<T>>;
 
-int rank(double price, std::vector<double> competitor_prices) {
+void print_vec(std::vector<double> vec) {
+  for(const double& value: vec) {
+    std::cout << value << ' ';
+  }
+  std::cout << std::endl;
+}
+
+void print_pair(PricePair pair) {
+  std::cout << pair.first << ' ' << pair.second << std::endl;
+}
+
+double dot_product(std::vector<double> a, std::vector<double> b) {
+  double sum = 0;
+  
+  for (int i = 0; i < std::min(a.size(), b.size()); i++) {
+    sum += a[i] * b[i];
+  }
+  return sum;
+}
+
+double sigmoid(double a) {
+  return 1.0 / (1.0 + std::exp(-a));
+}
+
+int rank(double price, const std::vector<double>& competitor_prices) {
   int rank = competitor_prices.size();
   for (int i = 0; i < competitor_prices.size(); i++) {
     if (price < competitor_prices[i]) {
@@ -15,11 +44,11 @@ int rank(double price, std::vector<double> competitor_prices) {
 }
 
 unsigned int factorial(unsigned int n) {
-  return (n == 0) ? 1 : factorial(n - 1);
+  return (n == 0) ? 1 : n * factorial(n - 1);
 }
 
 double poisson_pdf(unsigned int i, double mu) {
-  return std::pow(mu, i) / factorial(i) * std:: exp(-mu);
+  return std::pow(mu, i) / factorial(i) * std::exp(-mu);
 }
 
 unsigned int poisson_ppf(double mu, double q) {
@@ -32,14 +61,9 @@ unsigned int poisson_ppf(double mu, double q) {
   return i;
 }
 
-double predict_logistic_regression(std::vector<double> x, std::vector<double> coeff) {
-  double sum = 0;
-  for (int i = 0; i < std::min(x.size(), coeff.size()); i++) {
-    sum += x[i] * coeff[i];
-  }
-  return std::exp(sum) / (1 + std::exp(sum));
+double predict_logistic_regression(const std::vector<double>& x, const std::vector<double>& coeff) {
+  return sigmoid(dot_product(x, coeff));
 }
-
 
 class PriceOptimizer {
   public:
@@ -52,50 +76,48 @@ class PriceOptimizer {
     double delta = 0.99;
     std::vector<double> price_range = {};
     std::vector<double> competitor_prices = {};
-    std::vector<double> sales_model_coeff = {};
-
-    std::pair<double, double> run(int, int);
+    std::vector<double> sales_model_coef = {};
+    PricePair run(int, int);
 
   private:
-    std::vector< std::pair<double, double> > cache;
-    static std::pair<double, double> cache_default;
+    Grid<PricePair> cache;
+    static PricePair cache_default;
 
     double _V(double, int, int);
-    std::pair<double, double> V_impl(int, int);
-    std::pair<double, double> V(int, int);
+    PricePair V_impl(int, int);
+    PricePair V(int, int);
     double sales_model(double, int);
 };
 
-std::pair<double, double> PriceOptimizer::cache_default = 
-  std::make_pair<double, double>(-100000, -100000);
+PricePair PriceOptimizer::cache_default = 
+  std::make_pair(-100000., -100000.);
 
-PriceOptimizer::PriceOptimizer(int T, int N) {
-  this->T = T;
-  this->N = N;
-  cache = std::vector< std::pair<double, double> >((T + 1) * (N + 1));
-  std::fill(cache.begin(), cache.end(), cache_default);
+PriceOptimizer::PriceOptimizer(int T, int N) : T(T), N(N) {
+  std::vector<PricePair> cache_list(T + 1);
+  std::fill(cache_list.begin(), cache_list.end(), cache_default);
+  cache = Grid<PricePair>(N + 1);
+  std::fill(cache.begin(), cache.end(), cache_list);
 }
 
 double PriceOptimizer::_V(double price, int t, int n) {
   double p = sales_model(price, t);
   double sum = 0;
   int i_max = poisson_ppf(M * p, 0.9999);
-  for (int i = 0; i <= i_max; i++) {
+  for (int i = 0; i < i_max; i++) {
     if (i > n) {
       break;
     }
-
     double pi = poisson_pdf(i, M * p);
     double today_profit = std::min(n, i) * price;
     double holding_costs = n * L;
-    double V_future = std::get<1>(V(t + 1, std::max(0, n - i)));
+    double V_future = V(t + 1, std::max(0, n - i)).second;
     double exp_future_profits = delta * V_future;
     sum += pi * (today_profit - holding_costs + exp_future_profits);
   }
   return sum;
 }
 
-std::pair<double, double> PriceOptimizer::V_impl(int t, int n) {
+PricePair PriceOptimizer::V_impl(int t, int n) {
   if (t >= T) {
     return std::make_pair(0, n * Z);
   }
@@ -103,26 +125,26 @@ std::pair<double, double> PriceOptimizer::V_impl(int t, int n) {
     return std::make_pair(0, 0);
   }
 
-  std::pair<double, double> price_opt_pair;
+  PricePair price_opt_pair;
 
   for (double price: price_range) {
     double v = _V(price, t, n);
-    if (v > std::get<1>(price_opt_pair)) { 
+    if (v > price_opt_pair.second) { 
       price_opt_pair = std::make_pair(price, v);
     }
   }
   return price_opt_pair;
 }
 
-std::pair<double, double> PriceOptimizer::V(int t, int n) {
-  if (cache[t + T * n] != cache_default) {
-    return cache[t + T * n];
+PricePair PriceOptimizer::V(int t, int n) {
+  if (cache[t][n] != cache_default) {
+    return cache[t][n];
   }
 
-  std::pair<double, double> price_pair = V_impl(t, n);
-  cache[t + T * n] = price_pair;
+  PricePair price_pair = V_impl(t, n);
+  cache[t][n] = price_pair;
   
-  // printf("%d %d %f %f\n", t, n, std::get<0>(price_pair), std::get<1>(price_pair));
+  // printf("%d %d %f %f\n", t, n, price_pair.first, price_pair.second);
   return price_pair;
 }
 
@@ -131,14 +153,14 @@ std::pair<double, double> PriceOptimizer::run(int t, int n) {
 }
 
 double PriceOptimizer::sales_model(double price, int t) {
-  std::vector<double> x = { 
-    price, 
-    competitor_prices[0],
-    competitor_prices[1],
-    competitor_prices[2],
-    competitor_prices[3],
-    competitor_prices[4],
-    double(rank(price, competitor_prices))
+  std::vector<double> x = {
+    1,
+    double(rank(price, competitor_prices)),
+    price - *std::min_element(competitor_prices.begin(), competitor_prices.end()),
+    double(competitor_prices.size()),
+    (price + std::accumulate(competitor_prices.begin(), competitor_prices.end(), 0)) / (1 + competitor_prices.size()),
+    double(t),
+    double(t * t)
   };
-  return predict_logistic_regression(x, sales_model_coeff);
+  return predict_logistic_regression(x, sales_model_coef);
 }
