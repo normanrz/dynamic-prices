@@ -22,7 +22,6 @@ void print_pair(PricePair pair) {
 
 double dot_product(std::vector<double> a, std::vector<double> b) {
   double sum = 0;
-  
   for (int i = 0; i < std::min(a.size(), b.size()); i++) {
     sum += a[i] * b[i];
   }
@@ -65,12 +64,15 @@ double predict_logistic_regression(const std::vector<double>& x, const std::vect
   return sigmoid(dot_product(x, coeff));
 }
 
+double predict_linear_regression(const std::vector<double>& x, const std::vector<double>& coeff) {
+  return std::max(0., dot_product(x, coeff));
+}
+
 class PriceOptimizer {
   public:
     PriceOptimizer(int, int);
     int T;
     int N;
-    int M = 10;
     double L = 0.1;
     double Z = 0.5;
     double delta = 0.99;
@@ -93,21 +95,21 @@ PricePair PriceOptimizer::cache_default =
   std::make_pair(-100000., -100000.);
 
 PriceOptimizer::PriceOptimizer(int T, int N) : T(T), N(N) {
-  std::vector<PricePair> cache_list(T + 1);
+  std::vector<PricePair> cache_list(N + 1);
   std::fill(cache_list.begin(), cache_list.end(), cache_default);
-  cache = Grid<PricePair>(N + 1);
+  cache = Grid<PricePair>(T + 1);
   std::fill(cache.begin(), cache.end(), cache_list);
 }
 
 double PriceOptimizer::_V(double price, int t, int n) {
   double p = sales_model(price, t);
   double sum = 0;
-  int i_max = poisson_ppf(M * p, 0.9999);
+  int i_max = poisson_ppf(p, 0.9999);
   for (int i = 0; i < i_max; i++) {
     if (i > n) {
       break;
     }
-    double pi = poisson_pdf(i, M * p);
+    double pi = poisson_pdf(i, p);
     double today_profit = std::min(n, i) * price;
     double holding_costs = n * L;
     double V_future = V(t + 1, std::max(0, n - i)).second;
@@ -157,10 +159,12 @@ double PriceOptimizer::sales_model(double price, int t) {
     1,
     double(rank(price, competitor_prices)),
     price - *std::min_element(competitor_prices.begin(), competitor_prices.end()),
-    double(competitor_prices.size()),
+    double(rank(price, competitor_prices)),
     (price + std::accumulate(competitor_prices.begin(), competitor_prices.end(), 0)) / (1 + competitor_prices.size()),
     double(t),
     double(t * t)
   };
-  return predict_logistic_regression(x, sales_model_coef);
+  // print_vec(x);
+  // std::cout << predict_linear_regression(x, sales_model_coef) << std::endl;
+  return predict_linear_regression(x, sales_model_coef);
 }

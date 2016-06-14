@@ -8,6 +8,3 @@ optimize_price.so: optimize_price.cpp PriceOptimizer.cpp
 		-lboost_python3 \
 		-fpic \
 		optimize_price.cpp -o optimize_price.so
-
-price_optimizer: test.cpp PriceOptimizer.cpp
-	$(CXX) --std=c++14 -O3 test.cpp -o price_optimizer

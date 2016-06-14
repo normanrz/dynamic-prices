@@ -3,14 +3,14 @@ from scipy.stats import poisson
 
 class PriceOptimizer():
     def __init__(self, sales_model_coef, competitor_prices,
-               T=20, N=15, M=5,
+               T=20, N=15,
                price_range=np.arange(10, 20, 1), 
                L=0.01, delta=0.99, Z=0.5):
         self.sales_model_coef = sales_model_coef
         self.competitor_prices = competitor_prices
         self.T = T # max. time intervals
         self.N = N # max. items
-        self.M = M # reference items sold per interval
+        # self.M = M # reference items sold per interval
         self.price_range = price_range # acceptable price range
         self.L = L # holding cost per item
         self.delta = delta # discount factor for future sales
@@ -21,17 +21,16 @@ class PriceOptimizer():
 
     def sales_prob(self, price, t):
         x = np.concatenate(([1], self.make_X(price, self.competitor_prices, t)))
-        dotProduct = np.dot(x, self.sales_model_coef)
-        return 1 / (1 + np.exp(-dotProduct))
+        return np.maximum(0, np.dot(x, self.sales_model_coef))
 
 
     def _V(self, price, t, n):
         p = self.sales_prob(price, t)
         _sum = 0
-        for i in range(int(poisson.ppf(0.9999, self.M * p)) + 1):
+        for i in range(int(poisson.ppf(0.9999, p)) + 1):
             if i > n:
                 break
-            pi = poisson.pmf(i, self.M * p)
+            pi = poisson.pmf(i, p)
             today_profit = min(n, i) * price
             holding_costs = n * self.L
             _, V_future = self.V(t + 1, max(0, n - i))
