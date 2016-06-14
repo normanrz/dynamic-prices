@@ -16,6 +16,10 @@
 			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
 		<![endif]-->
 		<style type="text/css">
+			body > div {
+				float: left;
+			}
+			
 			#graph body {
  		 		font: 10px sans-serif;
 			}
@@ -35,7 +39,12 @@
 	</head>
 	<body>
 		<h1 class="text-center">Hello World</h1>
-		<div id='graph'></div>
+		<div id='graph'>
+			<h2 class="text-center">Pricing Policy</h2>
+		</div>
+		<div id='Ns'>
+			<h2 class="text-center">Select N</h2>
+		</div>
 
 		<!-- D3 -->
 		<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>

@@ -15,8 +15,11 @@ function draw() {
   }
 
   const T = 20;
-  let data1 = randomArray(T);
-  let data2 = randomArray(T);
+  const N = 15;
+  let dataArray = [];
+  for( let i = 0; i < N; i++) {
+    dataArray.push(randomArray(T));
+  }
 
 
   var margin = {top: 20, right: 20, bottom: 30, left: 50},
@@ -45,19 +48,6 @@ function draw() {
       .x(function(d, i) { return x(i); })
       .y(function(d, i) { return y(d); });
 
-  var changeToColor = function(){
-    let x = d3.select(this)
-      .attr("stroke", "grey")
-      .moveToFront();
-
-    $('h1').text(x.attr("N"));
-  }
-  var changeToGrey = function(){
-    d3.select(this).attr("stroke", "whitesmoke");
-    $('h1').text("Hello World");
-  }
-
-
   var svg = d3.select("#graph").append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
@@ -73,23 +63,53 @@ function draw() {
       .attr("class", "y axis")
       .call(yAxis);
 
-    svg.append("path")
-      .attr("N", "N=1")
-      .attr("class", "line")
-      .attr("stroke", "whitesmoke")
-      .on("mouseover", changeToColor)
-      .on("mouseout", changeToGrey)
-      .attr("d", line(data1));
+    function changeToColor(){
+      let x = d3.select(this)
+        .attr("stroke", "grey")
+        .moveToFront();
 
-    svg.append("path")
-      .attr("N", "N=2")
-      .attr("class", "line")
-      .attr("stroke", "whitesmoke")
-      .on("mouseover", changeToColor)
-      .on("mouseout", changeToGrey)
-      .attr("d", line(data2));
+      $("#Ns div[n='" + x.attr("id") + "'").css("color", "grey");
+    }
 
+    function changeToGrey(){
+      d3.select(this).attr("stroke", "whitesmoke");
+      $('#Ns div').css("color", "whitesmoke");
+    }
 
+    function hoverIn() {
+      $(this).css("color", "grey");
+      const n = $(this).attr("n");
+      const line = d3.select(".line[id='" + n + "']");
+      line.moveToFront();
+      line.attr("stroke", "grey");
+    }
+
+    function hoverOut() {
+      $(this).css("color", "whitesmoke");
+      const n = $(this).attr("n");
+      const line = d3.select(".line[id='" + n + "']");
+      line.attr("stroke", "whitesmoke");
+    }
+
+    function fillInData(data, n) {
+      let newDiv = $("<div></div>").text("N=" + n);
+      newDiv.hover(hoverIn, hoverOut);
+      newDiv.attr("n", n);
+      newDiv.css("color", "whitesmoke");
+      $("#Ns").append(newDiv);
+
+      svg.append("path")
+        .attr("id", n)
+        .attr("class", "line")
+        .attr("stroke", "whitesmoke")
+        .on("mouseover", changeToColor)
+        .on("mouseout", changeToGrey)
+        .attr("d", line(data));
+    }
+
+    dataArray.forEach(function(data, i) {
+      fillInData(data, i);
+    });
 }
 
 $(document).ready(function(){
