@@ -4,10 +4,11 @@
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Title Page</title>
+		<title>Bellmann Equation for Selling Perishable Products in a Competetive Environment</title>
 
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans|Raleway" rel="stylesheet">
 		<!-- Bootstrap CSS -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+		<link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
 
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -16,8 +17,12 @@
 			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
 		<![endif]-->
 		<style type="text/css">
-			body > div {
-				float: left;
+			body {
+				font-family: 'Open Sans', sans-serif;
+			}
+
+			h1, h2, h3, h3, h4, h5, h6, {
+				font-family: 'Raleway', sans-serif;
 			}
 			
 			#graph body {
@@ -38,23 +43,27 @@
 		</style>
 	</head>
 	<body>
-		<h1 class="text-center">Hello World</h1>
-		<div id='graph'>
-			<h2 class="text-center">Pricing Policy</h2>
-		</div>
-		<div id='Ns'>
-			<h2 class="text-center">Select N</h2>
-		</div>
+		<div class="container">
+			<div class="page-header text-center">
+		  	<h1>Bellmann Equation<br><small>for Selling Perishable Products in a Competetive Environment</small></h1>
+			</div>
+			<div id="graph" class="pull-left">
+				<h2 class="text-center">Pricing Policy</h2>
+			</div>
+			<div id="Ns" class="pull-left">
+				<p class="text-center">Select N</p>
+			</div>
 
-		<!-- D3 -->
-		<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-		<!-- jQuery -->
-		<script src="//code.jquery.com/jquery.js"></script>
-		<!-- Bootstrap JavaScript -->
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
-
-		<script src='drawgraph.js'></script>
-		<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
- 		<!-- <script src="Hello World"></script> -->
+			<!-- D3 -->
+			<script src="bower_components/d3/d3.min.js" charset="utf-8"></script>
+			<!-- jQuery -->
+			<script src="bower_components/jquery/dist/jquery.min.js"></script>
+			<!-- Bootstrap JavaScript -->
+			<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+			
+			<script src='drawgraph.js'></script>
+			<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+	 		<!-- <script src="Hello World"></script> -->
+	 		</div>
 	</body>
 </html>
