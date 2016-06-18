@@ -25,20 +25,26 @@
 				font-family: 'Raleway', sans-serif;
 			}
 			
-			#graph body {
- 		 		font: 10px sans-serif;
+			body #pricingpolicy {
+ 		 		font-size: 10px;
 			}
 
 			.axis path,
-			#graph .axis line {
+			#pricingpolicy .axis line {
 			  fill: none;
 			  stroke: #000;
 			  shape-rendering: crispEdges;
 			}
 
-			#graph .line {
+			#pricingpolicy .line {
 			  fill: none;
 			  stroke-width: 3px;
+			}
+
+			.tooltip {
+				font-size: 0.5em;
+				background-color: white;
+
 			}
 		</style>
 	</head>
@@ -47,11 +53,14 @@
 			<div class="page-header text-center">
 		  	<h1>Bellmann Equation<br><small>for Selling Perishable Products in a Competetive Environment</small></h1>
 			</div>
-			<div id="graph" class="pull-left">
-				<h2 class="text-center">Pricing Policy</h2>
-			</div>
-			<div id="Ns" class="pull-left">
-				<p class="text-center">Select N</p>
+			<div class="row">
+				<h3 class="text-center">Optimal Pricing Policy</h3>			
+				<div class="col-xs-12 col-md-10">
+					<div id="pricingpolicy"></div>					
+				</div>
+				<div class="col-xs-12 col-md-2">
+					<div id="selectN"></div>
+				</div>
 			</div>
 
 			<!-- D3 -->
