@@ -11,10 +11,10 @@ const tooltip = d3.select('body').append('div')
 const margin = { top: 20, right: 20, bottom: 20, left: 20 };
 
 class LineChart {
-  constructor(T, N, maxPrice, divId) {
+  constructor(height, T, N, maxPrice, divToDraw) {
     this.data = []
-    this.width = $(divId).width() - margin.left - margin.right,
-    this.height = 400 - margin.top - margin.bottom;
+    this.width = divToDraw.node().getBoundingClientRect().width - margin.left - margin.right,
+    this.height = height - margin.top - margin.bottom;
 
     this.x = d3.scale.linear()
       .domain([0, T])
@@ -36,7 +36,8 @@ class LineChart {
       .x((d, i) => this.x(i))
       .y((d, i) => this.y(d));
 
-    this.svg = d3.select(divId).append('svg')
+    this.svg = divToDraw.append('svg')
+      .attr('class', 'chart')
       .attr('width', this.width + margin.left + margin.right)
       .attr('height', this.height + margin.top + margin.bottom)
       .append('g')
@@ -82,12 +83,13 @@ class PricingPolicyChart extends LineChart {
       const time = Math.round(self.x.invert(d3.mouse(this)[0]));
       const price = self.data[n][time].toFixed(2);
 
-      tooltip.transition()    
-          .duration(100)    
-          .style('opacity', .9);    
+      tooltip.transition()
+        .delay(1000)    
+        .duration(100)    
+        .style('opacity', .9);    
       tooltip.html(`${time}, ${price}`)  
-          .style('left', `${d3.event.pageX}px`)   
-          .style('top', `${(d3.event.pageY - 20)}px`);        
+        .style('left', `${d3.event.pageX}px`)   
+        .style('top', `${(d3.event.pageY - 20)}px`);        
     }
 
     function mouseOut() {
@@ -131,18 +133,60 @@ class PricingPolicyChart extends LineChart {
   }
 }
 
+class SimulationResultChart extends LineChart {
+  drawLine(prices) {
+
+  this.svg.append('path')
+    .attr('class', 'sim-line')
+    .attr('stroke', 'whitesmoke')
+    // .on('mouseover', mouseOver)
+    // .on('mouseout', mouseOut)
+    // .on('mousemove', mouseMove)
+    .attr('d', this.line(prices));
+  }
+}
+
 $(document).ready(function(){
   const T = 100;
   const N = 20;
   const maxPrice = 20;
 
+  function randomArray(length) {
+  return Array.apply(null, Array(length)).map(function(_, i) {
+    return Math.random() * maxPrice;
+  });
+}
   fetch('/api/pricing_policy', { 
     method: 'POST', 
     body: JSON.stringify({ T, N }), 
     headers: { 'Content-Type': 'application/json' }
   }).then(res => res.json())
     .then(result => {
-      pricingPolicyChart = new PricingPolicyChart(T, N, 20, '#pricingpolicy');
+      pricingPolicyChart = new PricingPolicyChart(400, T, N, maxPrice, d3.select('#pricingpolicy'));
       result.forEach(row => pricingPolicyChart.drawLine(row.prices, row.n));
+
+      sims = []
+      for(let i = 0; i < 12; i++) {
+        sims.push(randomArray(T));
+      }
+      sims.forEach( s => {
+        const newDiv = $('<div></div>')
+          .addClass('col-md-3')
+          .addClass('text-center')
+        $('#sim').append(newDiv);
+
+        chart = new SimulationResultChart(200, T, N, maxPrice, d3.select(newDiv.get()[0]))
+          .drawLine(s);
+
+        const newB = $('<button></button')
+          .text('Details')
+          .addClass('btn')
+          .addClass('btn-default');
+
+        newDiv.append(newB);
+
+      });
+
+
     });
 });

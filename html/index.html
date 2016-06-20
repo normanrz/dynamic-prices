@@ -21,26 +21,31 @@
 				font-family: 'Open Sans', sans-serif !important;
 			}
 			
-			body #pricingpolicy {
+			body .chart {
  		 		font-size: 0.5em;
 			}
 
 			.axis path,
-			#pricingpolicy .axis line {
+			.chart .axis line {
 			  fill: none;
 			  stroke: #000;
 			  shape-rendering: crispEdges;
 			}
 
-			#pricingpolicy .line {
+			.chart .line {
 			  fill: none;
 			  stroke-width: 3px;
+			}
+
+			.chart .sim-line {
+				stroke: grey;
+				stroke-width: 1px;
+				fill: none;
 			}
 
 			.tooltip {
 				font-size: 0.5em;
 				background-color: white;
-
 			}
 		</style>
 	</head>
@@ -58,6 +63,9 @@
 					<div id="selectN"></div>
 				</div>
 			</div>
+			<h3 class="text-center">Simulations</h3>
+			<div class="row" id="sim"></div>
+			<h3 class="text-center">Summary</h3>
 
 			<!-- D3 -->
 			<script src="bower_components/d3/d3.min.js" charset="utf-8"></script>
