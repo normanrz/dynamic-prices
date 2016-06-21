@@ -24,6 +24,49 @@ def make_price_optimizer(sales_model_coef, competitor_prices,
   po.sales_model_coef = sales_model_coef
   return po
 
+def run_simulations(T, N, iterations):
+
+  results = []
+  optimizer = make_price_optimizer(sales_model_coef, competitor_prices, T=T, N=N)
+
+  L = optimizer.L
+  Z = optimizer.Z
+  
+  for i in range(iterations):
+    price_history = []
+    competitor_prices_history = []
+    accumulated_sales = []
+
+    profit = 0
+    n = N
+    
+    for t in range(0, T):
+      price, V = optimizer.run(t, n)
+      pi = optimizer.sales_model(price, t)
+      sales = min(n, np.random.poisson(pi))
+      n = n - sales
+      profit += price * sales - L * n
+
+      price_history.append(price)
+      accumulated_sales.append(N - n)
+      competitor_prices_history.append(competitor_prices.tolist())
+
+      # # Change competitor prices
+      # competitor_prices = competitor_prices * np.random.uniform(0.8, 1.2, 5)
+      # optimizer = PriceOptimizer(sales_model, competitor_prices, N=n, T=T, L=L, Z=Z)
+
+    # Realize salvage profits
+    profit += n * Z
+    
+    results.append({
+      'self': price_history,
+      'competitors': competitor_prices_history,
+      'sales': accumulated_sales,
+      'profit': profit,
+    })
+
+  return results
+
 
 @app.route('/')
 def index():
@@ -45,15 +88,14 @@ def pricing_policy():
   }, range(1, N + 1)))
   return Response(json.dumps(result),  mimetype='application/json')
 
-@app.route('/api/simulation', methods=['POST'])
-def simulation():
+@app.route('/api/simulations', methods=['POST'])
+def simulations():
   options = request.get_json()
-  js = {
-    'self': [1, 2],
-    'competitors': [[2, 3], [3, 4]],
-    'options': options
-  }
-  return Response(json.dumps(js),  mimetype='application/json')
+  T = options['T']
+  N = options['N']
+  iterations = options['counts']
+  results = run_simulations(T, N, iterations)
+  return Response(json.dumps(results),  mimetype='application/json')
 
 if __name__ == "__main__":
   # Start the server

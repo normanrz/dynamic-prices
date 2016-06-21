@@ -80,6 +80,7 @@ class PriceOptimizer {
     std::vector<double> competitor_prices = {};
     std::vector<double> sales_model_coef = {};
     PricePair run(int, int);
+    double sales_model(double, int);
 
   private:
     Grid<PricePair> cache;
@@ -88,7 +89,6 @@ class PriceOptimizer {
     double _V(double, int, int);
     PricePair V_impl(int, int);
     PricePair V(int, int);
-    double sales_model(double, int);
 };
 
 PricePair PriceOptimizer::cache_default = 

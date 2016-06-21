@@ -39,6 +39,7 @@ BOOST_PYTHON_MODULE(optimize_price)
 
   class_<PriceOptimizer>("PriceOptimizer", init<int, int>())
     .def("run", &run)
+    .def("sales_model", &PriceOptimizer::sales_model)
     .def_readwrite("L", &PriceOptimizer::L)
     .def_readwrite("Z", &PriceOptimizer::Z)
     .def_readwrite("delta", &PriceOptimizer::delta)
