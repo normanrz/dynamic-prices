@@ -239,7 +239,8 @@ function fetchAll(options) {
     method: 'POST', 
     body: JSON.stringify(options), 
     headers: { 'Content-Type': 'application/json' }
-  }).then(res => res.json())
+  })
+    .then(res => res.json())
     .then(result => {
       $("#diagrams").html(
         '<div class="row">' +
@@ -264,16 +265,20 @@ function fetchAll(options) {
         method: 'POST',
         body: JSON.stringify(options),
         headers: { 'Content-Type': 'application/json' },
-      }).then(res => res.json())
+      })
+        .then(res => res.json())
         .then(json => {
 
         let results = [];
-        let competitors_count = json.all.competitors[0][0].length;
+        const competitors_count = json.all.competitors[0][0].length;
+        let competitorsIds = [];
+        for(let i = 0; i < competitors_count; i++)
+          competitorsIds.push(i);
         for (let i = 0; i < counts; i++) {
           results[i] = {
             profit: json.all.profit[i][json.all.profit[i].length - 1],
             self: json.all.price[i],
-            competitors: range(competitors_count).map(
+            competitors: competitorsIds.map(
               (_, j) => json.all.competitors[i].map(c => c[j])),
           };
 
@@ -288,7 +293,7 @@ function fetchAll(options) {
             .addClass('text-center');
           $('#sim').append(newDiv);
 
-          let chart = new SimulationResultChart(200, T, N, max_price, d3.select(newDiv.get()[0]));
+          let chart = new SimulationResultChart(200, T, N, price_max, d3.select(newDiv.get()[0]));
           row.competitors.forEach( c => chart.drawLine(c, false));
           chart.drawLine(row.self, true);
 
@@ -307,6 +312,7 @@ function fetchAll(options) {
           // newDiv.append(newB);
 
         });
+      });
   });
 }
 
