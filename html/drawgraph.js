@@ -276,6 +276,7 @@ function fetchAll(options) {
         '<h3 class="text-center">Profits summary</h3>' +
         '<div class="row" id="avgPrices"></div>' +
         '<div class="row" id="avgInventory"></div>' +
+        '<div class="row" id="avgProfit"></div>' +
         '<div class="row" id="endProbability"></div>' +
         '<div class="row" id="histogram"></div>');
 
@@ -347,6 +348,11 @@ function fetchAll(options) {
 
         const endProbabilityChart = new LineChart(400, T, 1, d3.select('#endProbability'), 'Time', 'Sale Probability');
         endProbabilityChart.drawLine(json.averages.end_probability, true); 
+
+        const maxProfitGuess = json.averages.profit[json.averages.profit.length - 1] * 1.5;
+        const profitChart = new LineChart(400, T, maxProfitGuess, d3.select('#avgProfit'), 'Time', 'Profit');
+        json.all.profit.forEach( x => profitChart.drawLine(x, false));
+        profitChart.drawLine(json.averages.profit, true); 
 
         d3.selectAll('.axis').moveToFront();
       });
