@@ -267,7 +267,6 @@ function fetchAll(options) {
       }).then(res => res.json())
         .then(json => {
 
-<<<<<<< HEAD
         let results = [];
         let competitors_count = json.all.competitors[0][0].length;
         for (let i = 0; i < counts; i++) {
@@ -307,45 +306,6 @@ function fetchAll(options) {
           //   .addClass('btn-xs');
           // newDiv.append(newB);
 
-=======
-          let results = [];
-          for (let i = 0; i < counts; i++) {
-            results[i] = {
-              profit: json.all.profit[i][json.all.profit[i].length - 1],
-              self: json.all.price[i],
-            };
-          }
-
-          results.slice(0, 12).forEach(row => {
-            const newDiv = $('<div></div>')
-              .addClass('col-md-3')
-              .addClass('text-center');
-            $('#sim').append(newDiv);
-
-            let chart = new SimulationResultChart(200, T, N, price_max, d3.select(newDiv.get()[0]))
-              .drawLine(row.self);
-
-            const newLabel = $('<div></div>')
-              .html(Math.round(row.profit))
-              .addClass('label')
-              .addClass('label-default');
-            newDiv.append(newLabel);
-
-            const newB = $('<button></button')
-              .text('Details')
-              .addClass('btn')
-              .addClass('btn-default')
-              .addClass('btn-xs');
-            newDiv.append(newB);
-
-          });
-
-          d3.select("#histogram")
-            .datum(results.map(a => a.profit))
-            .call(histogramChart()
-              .bins(10)
-              .tickFormat(d3.format(".02f")));
->>>>>>> 602bfda0f8e1d10c4e6b8eded84af927f37ae72d
         });
   });
 }
