@@ -24,7 +24,7 @@ def make_price_optimizer(sales_model_coef, competitor_prices,
   po.sales_model_coef = sales_model_coef
   return po
 
-def run_simulations(T, N, L, Z, delta, price_range, iterations):
+def run_simulations(iterations, T, N, L, Z, delta, price_range, ):
 
   results = []
   optimizer = make_price_optimizer(sales_model_coef, competitor_prices, T=T, N=N, Z=Z, L=L, delta=delta, price_range=price_range)
@@ -87,7 +87,7 @@ def pricing_policy():
   min_price = options['min_price']
   max_price = options['max_price']
   price_steps = options['price_steps']
-  price_range = np.arange(min_price, max_price, price_range)
+  price_range = np.arange(min_price, max_price, price_steps)
 
   po = make_price_optimizer(sales_model_coef, competitor_prices, T=T, N=N, Z=Z, L=L, delta=delta, price_range=price_range)
   result = list(map(lambda n: { 
@@ -108,10 +108,10 @@ def simulations():
   min_price = options['min_price']
   max_price = options['max_price']
   price_steps = options['price_steps']
-  price_range = np.arange(min_price, max_price, price_range)
+  price_range = np.arange(min_price, max_price, price_steps)
   iterations = options['counts']
 
-  results = run_simulations(T=T, N=N, Z=Z, L=L, delta=delta, price_range=price_range,  iterations)
+  results = run_simulations(iterations, T=T, N=N, Z=Z, L=L, delta=delta, price_range=price_range,  )
   return Response(json.dumps(results),  mimetype='application/json')
 
 if __name__ == "__main__":

@@ -11,7 +11,7 @@ const tooltip = d3.select('body').append('div')
 const margin = { top: 20, right: 20, bottom: 20, left: 20 };
 
 class LineChart {
-  constructor(height, T, N, maxPrice, divToDraw) {
+  constructor(height, T, N, max_price, divToDraw) {
     this.data = []
     this.width = divToDraw.node().getBoundingClientRect().width - margin.left - margin.right,
     this.height = height - margin.top - margin.bottom;
@@ -21,7 +21,7 @@ class LineChart {
       .range([0, this.width]);
       
     this.y = d3.scale.linear()
-      .domain([0, maxPrice])
+      .domain([0, max_price])
       .range([this.height, 0]);
 
     const xAxis = d3.svg.axis()
@@ -234,26 +234,31 @@ function histogramChart() {
 $(document).ready(function(){
   const T = 100;
   const N = 20;
-  const maxPrice = 20;
+  const L = 1;
+  const Z = 0.5;
+  const delta = 0.99;
+  const min_price = 10;
+  const max_price = 20;
+  const price_steps = 0.1;
   const counts = 12;
 
   function randomArray(length) {
   return Array.apply(null, Array(length)).map(function(_, i) {
-    return Math.random() * maxPrice;
+    return Math.random() * max_price;
   });
 }
   fetch('/api/pricing_policy', { 
     method: 'POST', 
-    body: JSON.stringify({ T, N }), 
+    body: JSON.stringify({ T, N, L, Z, delta, min_price, max_price, price_steps }), 
     headers: { 'Content-Type': 'application/json' }
   }).then(res => res.json())
     .then(result => {
-      pricingPolicyChart = new PricingPolicyChart(400, T, N, maxPrice, d3.select('#pricingpolicy'));
+      pricingPolicyChart = new PricingPolicyChart(400, T, N, max_price, d3.select('#pricingpolicy'));
       result.forEach(row => pricingPolicyChart.drawLine(row.prices, row.n));
 
       fetch('/api/simulations', {
         method: 'POST',
-        body: JSON.stringify({ T, N, counts }),
+        body: JSON.stringify({ T, N, L, Z, delta, min_price, max_price, price_steps, counts }),
         headers: { 'Content-Type': 'application/json' },
       }).then(res => res.json())
         .then(result => {
@@ -268,7 +273,7 @@ $(document).ready(function(){
             .addClass('text-center')
           $('#sim').append(newDiv);
 
-          chart = new SimulationResultChart(200, T, N, maxPrice, d3.select(newDiv.get()[0]))
+          chart = new SimulationResultChart(200, T, N, max_price, d3.select(newDiv.get()[0]))
             .drawLine(row.self);
 
           const newLabel = $('<div></div>')
