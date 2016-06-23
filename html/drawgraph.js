@@ -67,17 +67,30 @@ class LineChart {
   }
 
   drawLine(prices, primary) {
-  let color = 'whitesmoke';
-  if (primary) color = 'grey';
+    const self = this;
+    function mouseMove() {
+      const x = Math.round(self.x.invert(d3.mouse(this)[0]));
+      const y = Math.round(self.y.invert(d3.mouse(this)[1]));
 
-  this.svg.append('path')
-    .attr('class', 'sim-line')
-    .attr('stroke', color)
-    // .on('mouseover', mouseOver)
-    // .on('mouseout', mouseOut)
-    // .on('mousemove', mouseMove)
-    .attr('d', this.line(prices));
-  }
+      tooltip.transition()
+        .delay(1000)    
+        .duration(100)    
+        .style('opacity', .9);    
+      tooltip.html(`${x}, ${y}`)  
+        .style('left', `${d3.event.pageX}px`)   
+        .style('top', `${(d3.event.pageY - 20)}px`);        
+    }
+    let color = 'whitesmoke';
+    if (primary) color = 'grey';
+
+    this.svg.append('path')
+      .attr('class', 'sim-line')
+      .attr('stroke', color)
+      // .on('mouseover', mouseOver)
+      // .on('mouseout', mouseOut)
+      .on('mousemove', mouseMove)
+      .attr('d', this.line(prices));
+    }
 }
 
 class PricingPolicyChart extends LineChart {
