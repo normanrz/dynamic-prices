@@ -69,8 +69,8 @@ class LineChart {
   drawLine(prices, primary) {
     const self = this;
     function mouseMove() {
-      const x = Math.round(self.x.invert(d3.mouse(this)[0]));
-      const y = Math.round(self.y.invert(d3.mouse(this)[1]));
+      const x = Math.round(100 * self.x.invert(d3.mouse(this)[0])) / 100;
+      const y = Math.round(100 * self.y.invert(d3.mouse(this)[1])) / 100;
 
       tooltip.transition()
         .delay(1000)    
