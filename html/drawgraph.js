@@ -312,6 +312,12 @@ function fetchAll(options) {
           // newDiv.append(newB);
 
         });
+
+        d3.select("#histogram")
+          .datum(results.map(a => a.profit))
+          .call(histogramChart()
+          .bins(20)
+          .tickFormat(d3.format(".02f")));
       });
   });
 }
