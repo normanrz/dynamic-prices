@@ -134,10 +134,13 @@ class PricingPolicyChart extends LineChart {
 }
 
 class SimulationResultChart extends LineChart {
-  drawLine(prices) {
+  drawLine(prices, primary) {
+    let color = 'whitesmoke';
+    if (primary) color = 'grey';
+
     this.svg.append('path')
       .attr('class', 'sim-line')
-      .attr('stroke', 'whitesmoke')
+      .attr('stroke', color)
       // .on('mouseover', mouseOver)
       // .on('mouseout', mouseOut)
       // .on('mousemove', mouseMove)
@@ -233,6 +236,14 @@ $('.add-competitor').click( (e) => {
   $('#competitors div:first').clone().appendTo('#competitors');
 })
 
+function range(count) {
+  let result = [];
+  for (let i = 0; i < count; i++) {
+    result.push(i);
+  }
+  return result;
+}
+
 
 $(document).ready(function(){
   const T = 100;
@@ -274,21 +285,30 @@ $(document).ready(function(){
         .then(json => {
 
         let results = [];
+        let competitors_count = json.all.competitors[0][0].length;
         for (let i = 0; i < counts; i++) {
           results[i] = {
             profit: json.all.profit[i][json.all.profit[i].length - 1],
             self: json.all.price[i],
+            competitors: range(competitors_count).map(
+              (_, j) => json.all.competitors[i].map(c => c[j])),
           };
+
         }
 
         results.slice(0, 12).forEach(row => {
+
+          console.log(row);
+
           const newDiv = $('<div></div>')
             .addClass('col-md-3')
             .addClass('text-center');
           $('#sim').append(newDiv);
 
-          chart = new SimulationResultChart(200, T, N, max_price, d3.select(newDiv.get()[0]))
-            .drawLine(row.self);
+          let chart = new SimulationResultChart(200, T, N, max_price, d3.select(newDiv.get()[0]));
+          row.competitors.forEach( c => chart.drawLine(c, false));
+          chart.drawLine(row.self, true);
+
 
           const newLabel = $('<div></div>')
             .html(Math.round(row.profit))
@@ -296,12 +316,12 @@ $(document).ready(function(){
             .addClass('label-default');
           newDiv.append(newLabel);
 
-          const newB = $('<button></button')
-            .text('Details')
-            .addClass('btn')
-            .addClass('btn-default')
-            .addClass('btn-xs');
-          newDiv.append(newB);
+          // const newB = $('<button></button')
+          //   .text('Details')
+          //   .addClass('btn')
+          //   .addClass('btn-default')
+          //   .addClass('btn-xs');
+          // newDiv.append(newB);
 
         });
 
