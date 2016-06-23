@@ -1,0 +1,21 @@
+{
+  "name": "html",
+  "homepage": "https://github.com/normanrz/dynamic-prices",
+  "authors": [
+    "Johannes Filter <hi@jfilter.de>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "d3": "^3.5.17",
+    "bootstrap": "^3.3.6"
+  }
+}
