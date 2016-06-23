@@ -16,6 +16,8 @@
   ],
   "dependencies": {
     "d3": "^3.5.17",
-    "bootstrap": "^3.3.6"
+    "bootstrap": "^3.3.6",
+    "react": "^15.1.0",
+    "babel": "*"
   }
 }
