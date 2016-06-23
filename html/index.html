@@ -14,7 +14,7 @@
 				font-family: 'Open Sans', sans-serif !important;
 			}
 			
-			body .chart {
+			.chart {
  		 		font-size: 0.5em;
 			}
 
@@ -27,12 +27,7 @@
 
 			.chart .line {
 			  fill: none;
-			  stroke-width: 3px;
-			}
-
-			.chart .sim-line {
-				stroke-width: 1px;
-				fill: none;
+			  stroke-width: 2px;
 			}
 
 			.tooltip {
@@ -63,6 +58,18 @@
 				margin: 2em 0;
 			}
 
+			#selectN {
+				display: flex;
+				flex-flow: row wrap;
+				justify-content: flex-start;
+				/*justify-content: space-around;*/
+			}
+
+			#selectN > div {
+				width: 2em;
+				margin: 0.05em;
+				text-align: center;
+			}
 		</style>
 	</head>
 	<body>

@@ -73,7 +73,7 @@ class LineChart {
       const y = Math.round(100 * self.y.invert(d3.mouse(this)[1])) / 100;
 
       tooltip.transition()
-        .delay(1000)    
+        .delay(100)    
         .duration(100)    
         .style('opacity', .9);    
       tooltip.html(`${x}, ${y}`)  
@@ -84,10 +84,8 @@ class LineChart {
     if (primary) color = 'grey';
 
     this.svg.append('path')
-      .attr('class', 'sim-line')
+      .attr('class', 'line')
       .attr('stroke', color)
-      // .on('mouseover', mouseOver)
-      // .on('mouseout', mouseOut)
       .on('mousemove', mouseMove)
       .attr('d', this.line(prices));
     }
@@ -100,7 +98,9 @@ class PricingPolicyChart extends LineChart {
         .attr('stroke', 'grey')
         .moveToFront();
 
-      $(`#selectN div[n='${focusLine.attr('id')}'`).css('color', 'grey');
+      $(`#selectN div[n='${focusLine.attr('id')}'`)
+        .css('color', 'white')
+        .css('background-color', 'grey');
     }
 
     const self = this;
@@ -110,7 +110,7 @@ class PricingPolicyChart extends LineChart {
       const price = self.data[n][time].toFixed(2);
 
       tooltip.transition()
-        .delay(1000)    
+        .delay(100)    
         .duration(100)    
         .style('opacity', .9);    
       tooltip.html(`${time}, ${price}`)  
@@ -120,14 +120,18 @@ class PricingPolicyChart extends LineChart {
 
     function mouseOut() {
       d3.select(this).attr('stroke', 'whitesmoke');
-      $('#selectN div').css('color', 'whitesmoke');
+      $('#selectN > div')
+        .css('color', 'black')
+        .css('background-color', 'whitesmoke');
       tooltip.transition()
         .duration(100)
         .style('opacity', 0);
     }
 
     function hoverIn() {
-      $(this).css('color', 'grey');
+      $(this)
+        .css('color', 'white')
+        .css('background-color', 'grey');
       const n = $(this).attr('n');
       const line = d3.select(`.line[id='${n}']`);
       line.moveToFront();
@@ -135,17 +139,21 @@ class PricingPolicyChart extends LineChart {
     }
 
     function hoverOut() {
-      $(this).css('color', 'whitesmoke');
+      $(this)
+        .css('color', 'black')
+        .css('background-color', 'whitesmoke');
       const n = $(this).attr('n');
       const line = d3.select(`.line[id='${n}']`);
       line.attr('stroke', 'whitesmoke');
     }
 
     this.data.push(prices);
-    let newDiv = $('<div></div>').text(`N=${n}`);
-    newDiv.hover(hoverIn, hoverOut);
-    newDiv.attr('n', n);
-    newDiv.css('color', 'whitesmoke');
+    let newDiv = $('<div></div>')
+      .text(n)
+      .hover(hoverIn, hoverOut)
+      .css('color', 'black')
+      .css('background-color', 'whitesmoke')
+      .attr('n', n);
     $('#selectN').append(newDiv);
 
     this.svg.append('path')
@@ -260,7 +268,7 @@ function fetchAll(options) {
             '<div id="pricingpolicy"></div> ' +
           '</div>' +
           '<div class="col-xs-12 col-md-2">' +
-            '<div id="selectN"></div>' +
+            '<h4>Select N</h4><div id="selectN"></div>' +
           '</div>' +
         '</div>' +
         '<h3 class="text-center">Simulations</h3>' +
