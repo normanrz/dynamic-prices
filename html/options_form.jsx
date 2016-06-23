@@ -38,7 +38,9 @@ class OptionsForm extends React.Component {
   makeChangeHandler(path) {
     return (value) => {
       if (Array.isArray(path)) {
-
+        let copy = this.state[path[0]].slice(0);
+        copy[path[1]] = value;
+        this.setState({ [path[0]]: copy });
       } else {
         this.setState({ [path]: value });
       }
