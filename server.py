@@ -99,10 +99,10 @@ def pricing_policy():
   Z = options['Z']
   L = options['L']
   delta = options['delta']
-  min_price = options['min_price']
-  max_price = options['max_price']
-  price_steps = options['price_steps']
-  price_range = np.arange(min_price, max_price, price_steps)
+  price_min = options['price_min']
+  price_max = options['price_max']
+  price_step = options['price_step']
+  price_range = np.arange(price_min, price_max, price_step)
 
   po = make_price_optimizer(sales_model_coef, competitor_prices, T=T, N=N, Z=Z, L=L, delta=delta, price_range=price_range)
   result = list(map(lambda n: { 
@@ -120,10 +120,10 @@ def simulations():
   Z = options['Z']
   L = options['L']
   delta = options['delta']
-  min_price = options['min_price']
-  max_price = options['max_price']
-  price_steps = options['price_steps']
-  price_range = np.arange(min_price, max_price, price_steps)
+  price_min = options['price_min']
+  price_max = options['price_max']
+  price_step = options['price_step']
+  price_range = np.arange(price_min, price_max, price_step)
   iterations = options['counts']
 
   results = run_simulations(iterations, T=T, N=N, Z=Z, L=L, delta=delta, price_range=price_range,  )

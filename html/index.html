@@ -4,18 +4,11 @@
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Bellmann Equation for Selling Perishable Products in a Competetive Environment</title>
+		<title>Dynamic pricing for selling perishable products in a competetive environment</title>
 
 		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
 		<!-- Bootstrap CSS -->
 		<link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
-
-		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-		<!--[if lt IE 9]>
-			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.2/html5shiv.min.js"></script>
-			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-		<![endif]-->
 		<style type="text/css">
 			body {
 				font-family: 'Open Sans', sans-serif !important;
@@ -76,149 +69,10 @@
 	<body>
 		<div class="container">
 			<div class="page-header text-center">
-		  	<h1>Bellmann Equation<br><small>for Selling Perishable Products in a Competetive Environment</small></h1>
+		  	<h1>Dynamic pricing<br><small>for selling perishable products in a competetive environment</small></h1>
 			</div>
-			<div class="row">
-				<form>
-					<div class="row">
-					  <div class="form-group col-md-3">
-							<div class="input-group">
-							  <span class="input-group-addon" id="basic-addon1">Items (N)</span>
-							  <input type="text" class="form-control" placeholder="20" aria-describedby="basic-addon1">
-							</div>
-					  </div>
-					  <div class="form-group col-md-3">
-							<div class="input-group">
-							  <span class="input-group-addon" id="basic-addon1">Time (T)</span>
-							  <input type="text" class="form-control" placeholder="20" aria-describedby="basic-addon1">
-							</div>
-					  </div>
-					  <div class="form-group col-md-3">
-							<div class="input-group">
-							  <span class="input-group-addon" id="basic-addon1">Salvage Profit (Z)</span>
-							  <input type="text" class="form-control" placeholder="1" aria-describedby="basic-addon1">
-							</div>
-					  </div>
-					  <div class="form-group col-md-3">
-							<div class="input-group">
-							  <span class="input-group-addon" id="basic-addon1">Storage Cost (L)</span>
-							  <input type="text" class="form-control" placeholder="1" aria-describedby="basic-addon1">
-							</div>
-					  </div>
-					  <div class="form-group col-md-3">
-							<div class="input-group">
-							  <span class="input-group-addon" id="basic-addon1">Discount Factor (Δ)</span>
-							  <input type="text" class="form-control" placeholder="0.99" aria-describedby="basic-addon1">
-							</div>
-					  </div>
-					  <div class="form-group col-md-3">
-							<div class="input-group">
-							  <span class="input-group-addon" id="basic-addon1">Min. Price</span>
-							  <input type="text" class="form-control" placeholder="10" aria-describedby="basic-addon1">
-							</div>
-					  </div>
-					  <div class="form-group col-md-3">
-							<div class="input-group">
-							  <span class="input-group-addon" id="basic-addon1">Max. Price</span>
-							  <input type="text" class="form-control" placeholder="20" aria-describedby="basic-addon1">
-							</div>
-					  </div>
-					  <div class="form-group col-md-3">
-							<div class="input-group">
-							  <span class="input-group-addon" id="basic-addon1">Price Steps</span>
-							  <input type="text" class="form-control" placeholder="0.1" aria-describedby="basic-addon1">
-							</div>
-					  </div>
-					 </div>
-
-					<div class="row">
-					  <div class="form-group col-md-3">
-							<div class="input-group">
-							  <span class="input-group-addon" id="basic-addon1">C0</span>
-							  <input type="text" class="form-control" placeholder="20" aria-describedby="basic-addon1">
-							</div>
-					  </div>
-					  <div class="form-group col-md-3">
-							<div class="input-group">
-							  <span class="input-group-addon" id="basic-addon1">C1</span>
-							  <input type="text" class="form-control" placeholder="0.1" aria-describedby="basic-addon1">
-							</div>
-					  </div>
-					  <div class="form-group col-md-3">
-							<div class="input-group">
-							  <span class="input-group-addon" id="basic-addon1">C2</span>
-							  <input type="text" class="form-control" placeholder="20" aria-describedby="basic-addon1">
-							</div>
-					  </div>
-					  <div class="form-group col-md-3">
-							<div class="input-group">
-							  <span class="input-group-addon" id="basic-addon1">C3</span>
-							  <input type="text" class="form-control" placeholder="0.1" aria-describedby="basic-addon1">
-							</div>
-					  </div>
-					  <div class="form-group col-md-3">
-							<div class="input-group">
-							  <span class="input-group-addon" id="basic-addon1">CX</span>
-							  <input type="text" class="form-control" placeholder="20" aria-describedby="basic-addon1">
-							</div>
-					  </div>
-					  <div class="form-group col-md-3">
-							<div class="input-group">
-							  <span class="input-group-addon" id="basic-addon1">CX</span>
-							  <input type="text" class="form-control" placeholder="0.1" aria-describedby="basic-addon1">
-							</div>
-					  </div>
-					  <div class="form-group col-md-3">
-							<div class="input-group">
-							  <span class="input-group-addon" id="basic-addon1">CX</span>
-							  <input type="text" class="form-control" placeholder="20" aria-describedby="basic-addon1">
-							</div>
-					  </div>
-					  <div class="form-group col-md-3">
-							<div class="input-group">
-							  <span class="input-group-addon" id="basic-addon1">CX</span>
-							  <input type="text" class="form-control" placeholder="0.1" aria-describedby="basic-addon1">
-							</div>
-					  </div>
-					</div>
-					<div class="row" id="competitors">
-					  <div class="form-group col-md-3">
-							<div class="input-group">
-							  <span class="input-group-addon">Competitor</span>
-							  <input type="text" class="form-control" placeholder="10">
-					     <span class="input-group-btn">
-					        <button class="btn btn-default remove-competitor" type="button">
-					        	<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-					        </button>
-					      </span>
-							</div>
-					  </div>
-					  <div class="col-md-3">
-						  <button type="button" class="btn btn-default add-competitor">
-							  <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add
-							</button>
-						</div>
-					</div>
-
-					<div class="col-md-1 col-md-offset-8">
-				  	<button type="submit" class="btn btn-default">Submit</button>
-				  </div>
-				</form>
-			</div>
-
-			<div class="row">
-				<h3 class="text-center">Optimal Pricing Policy</h3>			
-				<div class="col-xs-12 col-md-10">
-					<div id="pricingpolicy"></div>					
-				</div>
-				<div class="col-xs-12 col-md-2">
-					<div id="selectN"></div>
-				</div>
-			</div>
-			<h3 class="text-center">Simulations</h3>
-			<div class="row" id="sim"></div>
-			<h3 class="text-center">Profits summary</h3>
-			<div class="row" id="histogram"></div>
+			<div id="options_form"></div>
+			<div id="diagrams"></div>
 
 			<!-- D3 -->
 			<script src="bower_components/d3/d3.min.js" charset="utf-8"></script>
@@ -226,10 +80,15 @@
 			<script src="bower_components/jquery/dist/jquery.min.js"></script>
 			<!-- Bootstrap JavaScript -->
 			<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-			
-			<script src='drawgraph.js'></script>
+			<!-- React -->
+			<script src="bower_components/react/react.js"></script>
+    	<script src="bower_components/react/react-dom.js"></script>
+    	<script src="bower_components/babel/browser.js"></script>
+			<script type="text/babel" src="options_form.jsx"></script>
+			<script src="drawgraph.js"></script>
+
 			<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 	 		<!-- <script src="Hello World"></script> -->
-	 		</div>
+	 	</div>
 	</body>
 </html>

@@ -5,15 +5,15 @@ d3.selection.prototype.moveToFront = function() {
 };
 
 const tooltip = d3.select('body').append('div') 
-    .attr('class', 'tooltip')       
-    .style('opacity', 0); 
+  .attr('class', 'tooltip')       
+  .style('opacity', 0); 
 
 const margin = { top: 20, right: 20, bottom: 20, left: 20 };
 
 class LineChart {
-  constructor(height, T, N, max_price, divToDraw) {
-    this.data = []
-    this.width = divToDraw.node().getBoundingClientRect().width - margin.left - margin.right,
+  constructor(height, T, N, price_max, divToDraw) {
+    this.data = [];
+    this.width = divToDraw.node().getBoundingClientRect().width - margin.left - margin.right;
     this.height = height - margin.top - margin.bottom;
 
     this.x = d3.scale.linear()
@@ -21,7 +21,7 @@ class LineChart {
       .range([0, this.width]);
       
     this.y = d3.scale.linear()
-      .domain([0, max_price])
+      .domain([0, price_max])
       .range([this.height, 0]);
 
     const xAxis = d3.svg.axis()
@@ -36,7 +36,7 @@ class LineChart {
       .x((d, i) => this.x(i))
       .y((d, i) => this.y(d));
 
-    this.svg = divToDraw.append('svg')
+    this.svg = divToDraw.html('').append('svg')
       .attr('class', 'chart')
       .attr('width', this.width + margin.left + margin.right)
       .attr('height', this.height + margin.top + margin.bottom)
@@ -97,7 +97,7 @@ class PricingPolicyChart extends LineChart {
       $('#selectN div').css('color', 'whitesmoke');
       tooltip.transition()
         .duration(100)
-        .style('opacity', 0)
+        .style('opacity', 0);
     }
 
     function hoverIn() {
@@ -146,11 +146,11 @@ class SimulationResultChart extends LineChart {
 }
 
 function histogramChart() {
-  var margin = {top: 0, right: 0, bottom: 20, left: 0},
+  let margin = { top: 0, right: 0, bottom: 20, left: 0 },
       width = 960,
       height = 500;
 
-  var histogram = d3.layout.histogram(),
+  let histogram = d3.layout.histogram(),
       x = d3.scale.ordinal(),
       y = d3.scale.linear(),
       xAxis = d3.svg.axis().scale(x).orient("bottom").tickSize(6, 0);
@@ -229,88 +229,86 @@ function histogramChart() {
   return chart;
 }
 
-$('.add-competitor').click( (e) => {
-  $('#competitors div:first').clone().appendTo('#competitors');
-})
-
-
-$(document).ready(function(){
-  const T = 100;
-  const N = 20;
-  const L = 1;
-  const Z = 0.5;
-  const delta = 0.99;
-  const min_price = 10;
-  const max_price = 20;
-  const price_steps = 0.1;
-  const counts = 100;
-
-  function randomArray(length) {
-    return Array.apply(null, Array(length)).map(function(_, i) {
-      return Math.random() * max_price;
-    });
-  }
-
-  $("form").submit(function(){
-    $.post($(this).attr("action"), $(this).serialize(), function(jsonData){
-      console.log(jsonData);
-    }, "json");
-  });
-
+function fetchAll(options) {
+  let { T, N, price_max, counts } = options;
   fetch('/api/pricing_policy', { 
     method: 'POST', 
-    body: JSON.stringify({ T, N, L, Z, delta, min_price, max_price, price_steps }), 
+    body: JSON.stringify(options), 
     headers: { 'Content-Type': 'application/json' }
   }).then(res => res.json())
     .then(result => {
-      pricingPolicyChart = new PricingPolicyChart(400, T, N, max_price, d3.select('#pricingpolicy'));
+      $("#diagrams").html(
+        '<div class="row">' +
+          '<h3 class="text-center">Optimal Pricing Policy</h3>' +
+          '<div class="col-xs-12 col-md-10">' +
+            '<div id="pricingpolicy"></div> ' +
+          '</div>' +
+          '<div class="col-xs-12 col-md-2">' +
+            '<div id="selectN"></div>' +
+          '</div>' +
+        '</div>' +
+        '<h3 class="text-center">Simulations</h3>' +
+        '<div class="row" id="sim"></div>' +
+        '<h3 class="text-center">Profits summary</h3>' +
+        '<div class="row" id="histogram"></div>');
+
+      let pricingPolicyChart = new PricingPolicyChart(400, T, N, price_max, d3.select('#pricingpolicy'));
+      
       result.forEach(row => pricingPolicyChart.drawLine(row.prices, row.n));
 
       fetch('/api/simulations', {
         method: 'POST',
-        body: JSON.stringify({ T, N, L, Z, delta, min_price, max_price, price_steps, counts }),
+        body: JSON.stringify(options),
         headers: { 'Content-Type': 'application/json' },
       }).then(res => res.json())
         .then(json => {
 
-        let results = [];
-        for (let i = 0; i < counts; i++) {
-          results[i] = {
-            profit: json.all.profit[i][json.all.profit[i].length - 1],
-            self: json.all.price[i],
-          };
-        }
+          let results = [];
+          for (let i = 0; i < counts; i++) {
+            results[i] = {
+              profit: json.all.profit[i][json.all.profit[i].length - 1],
+              self: json.all.price[i],
+            };
+          }
 
-        results.slice(0, 12).forEach(row => {
-          const newDiv = $('<div></div>')
-            .addClass('col-md-3')
-            .addClass('text-center');
-          $('#sim').append(newDiv);
+          results.slice(0, 12).forEach(row => {
+            const newDiv = $('<div></div>')
+              .addClass('col-md-3')
+              .addClass('text-center');
+            $('#sim').append(newDiv);
 
-          chart = new SimulationResultChart(200, T, N, max_price, d3.select(newDiv.get()[0]))
-            .drawLine(row.self);
+            let chart = new SimulationResultChart(200, T, N, price_max, d3.select(newDiv.get()[0]))
+              .drawLine(row.self);
 
-          const newLabel = $('<div></div>')
-            .html(Math.round(row.profit))
-            .addClass('label')
-            .addClass('label-default');
-          newDiv.append(newLabel);
+            const newLabel = $('<div></div>')
+              .html(Math.round(row.profit))
+              .addClass('label')
+              .addClass('label-default');
+            newDiv.append(newLabel);
 
-          const newB = $('<button></button')
-            .text('Details')
-            .addClass('btn')
-            .addClass('btn-default')
-            .addClass('btn-xs');
-          newDiv.append(newB);
+            const newB = $('<button></button')
+              .text('Details')
+              .addClass('btn')
+              .addClass('btn-default')
+              .addClass('btn-xs');
+            newDiv.append(newB);
 
+          });
+
+          d3.select("#histogram")
+            .datum(results.map(a => a.profit))
+            .call(histogramChart()
+              .bins(10)
+              .tickFormat(d3.format(".02f")));
         });
+  });
+}
 
-        d3.select("#histogram")
-          .datum(results.map(a => a.profit))
-          .call(histogramChart()
-            .bins(10)
-            .tickFormat(d3.format(".02f")));
-      })
-  })
-
+$(document).ready(function() {
+  setTimeout(() => {
+    let reactForm = ReactDOM.render(
+      React.createElement(OptionsForm, { onSubmit: fetchAll }),
+      document.getElementById("options_form"));
+    fetchAll(reactForm.state);
+  }, 500);
 });
