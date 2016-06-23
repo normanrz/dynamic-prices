@@ -230,6 +230,10 @@ function histogramChart() {
   return chart;
 }
 
+$('.add-competitor').click( (e) => {
+  $('#competitors div:first').clone().appendTo('#competitors');
+})
+
 
 $(document).ready(function(){
   const T = 100;
@@ -243,10 +247,17 @@ $(document).ready(function(){
   const counts = 12;
 
   function randomArray(length) {
-  return Array.apply(null, Array(length)).map(function(_, i) {
-    return Math.random() * max_price;
+    return Array.apply(null, Array(length)).map(function(_, i) {
+      return Math.random() * max_price;
+    });
+  }
+
+  $("form").submit(function(){
+    $.post($(this).attr("action"), $(this).serialize(), function(jsonData){
+      console.log(jsonData);
+    }, "json");
   });
-}
+
   fetch('/api/pricing_policy', { 
     method: 'POST', 
     body: JSON.stringify({ T, N, L, Z, delta, min_price, max_price, price_steps }), 
