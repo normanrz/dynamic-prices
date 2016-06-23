@@ -11,17 +11,17 @@ const tooltip = d3.select('body').append('div')
 const margin = { top: 20, right: 20, bottom: 20, left: 20 };
 
 class LineChart {
-  constructor(height, T, N, price_max, divToDraw) {
+  constructor(height, xMax, yMax, divToDraw, xLabel, yLabel) {
     this.data = [];
     this.width = divToDraw.node().getBoundingClientRect().width - margin.left - margin.right;
     this.height = height - margin.top - margin.bottom;
 
     this.x = d3.scale.linear()
-      .domain([0, T])
+      .domain([0, xMax])
       .range([0, this.width]);
       
     this.y = d3.scale.linear()
-      .domain([0, price_max])
+      .domain([0, yMax])
       .range([this.height, 0]);
 
     const xAxis = d3.svg.axis()
@@ -48,10 +48,11 @@ class LineChart {
       .attr('transform', `translate(-1, ${(this.height + 1)})`)
       .call(xAxis)
     .append('text')
-      .attr('x', this.width - 2 * this.width/T) // margin to no write on the pricingpolicys
+      .attr('x', this.width)
+      // .attr('x', this.width - 2 * this.width/xMax)
       .attr('dy', '-.71em')
       .style('text-anchor', 'end')
-      .text('Time');
+      .text(xLabel);
 
     this.svg.append('g')
       .attr('class', 'y axis')
@@ -62,12 +63,24 @@ class LineChart {
       .attr('y', 6)
       .attr('dy', '.71em')
       .style('text-anchor', 'end')
-      .text('Price');
+      .text(yLabel);
+  }
+
+  drawLine(prices, primary) {
+  let color = 'whitesmoke';
+  if (primary) color = 'grey';
+
+  this.svg.append('path')
+    .attr('class', 'sim-line')
+    .attr('stroke', color)
+    // .on('mouseover', mouseOver)
+    // .on('mouseout', mouseOut)
+    // .on('mousemove', mouseMove)
+    .attr('d', this.line(prices));
   }
 }
 
 class PricingPolicyChart extends LineChart {
-
   drawLine(prices, n) {
     function mouseOver() {
       let focusLine = d3.select(this)
@@ -129,21 +142,6 @@ class PricingPolicyChart extends LineChart {
       .on('mouseover', mouseOver)
       .on('mouseout', mouseOut)
       .on('mousemove', mouseMove)
-      .attr('d', this.line(prices));
-  }
-}
-
-class SimulationResultChart extends LineChart {
-  drawLine(prices, primary) {
-    let color = 'whitesmoke';
-    if (primary) color = 'grey';
-
-    this.svg.append('path')
-      .attr('class', 'sim-line')
-      .attr('stroke', color)
-      // .on('mouseover', mouseOver)
-      // .on('mouseout', mouseOut)
-      // .on('mousemove', mouseMove)
       .attr('d', this.line(prices));
   }
 }
@@ -255,9 +253,12 @@ function fetchAll(options) {
         '<h3 class="text-center">Simulations</h3>' +
         '<div class="row" id="sim"></div>' +
         '<h3 class="text-center">Profits summary</h3>' +
+        '<div class="row" id="avgPrices"></div>' +
+        '<div class="row" id="avgInventory"></div>' +
+        '<div class="row" id="endProbability"></div>' +
         '<div class="row" id="histogram"></div>');
 
-      let pricingPolicyChart = new PricingPolicyChart(400, T, N, price_max, d3.select('#pricingpolicy'));
+      let pricingPolicyChart = new PricingPolicyChart(400, T, price_max, d3.select('#pricingpolicy'), 'Time', 'Price');
       
       result.forEach(row => pricingPolicyChart.drawLine(row.prices, row.n));
 
@@ -278,25 +279,19 @@ function fetchAll(options) {
           results[i] = {
             profit: json.all.profit[i][json.all.profit[i].length - 1],
             self: json.all.price[i],
-            competitors: competitorsIds.map(
-              (_, j) => json.all.competitors[i].map(c => c[j])),
-          };
-
+            competitors: competitorsIds.map(j => json.all.competitors[i].map(c => c[j])),
+          }
         }
 
         results.slice(0, 12).forEach(row => {
-
-          console.log(row);
-
           const newDiv = $('<div></div>')
             .addClass('col-md-3')
             .addClass('text-center');
           $('#sim').append(newDiv);
 
-          let chart = new SimulationResultChart(200, T, N, price_max, d3.select(newDiv.get()[0]));
+          let chart = new LineChart(200, T, price_max, d3.select(newDiv.get()[0]), 'Time', 'Price');
           row.competitors.forEach( c => chart.drawLine(c, false));
           chart.drawLine(row.self, true);
-
 
           const newLabel = $('<div></div>')
             .html(Math.round(row.profit))
@@ -309,15 +304,30 @@ function fetchAll(options) {
           //   .addClass('btn')
           //   .addClass('btn-default')
           //   .addClass('btn-xs');
-          // newDiv.append(newB);
+          // newDiv.append(newB); 
 
         });
 
+        // draw histogram
         d3.select("#histogram")
           .datum(results.map(a => a.profit))
           .call(histogramChart()
           .bins(20)
           .tickFormat(d3.format(".02f")));
+
+        // draw other line charts
+        const salesChart = new LineChart(400, T, N, d3.select('#avgInventory'), 'Time', 'Items');
+        json.all.inventory.forEach( x => salesChart.drawLine(x, false));
+        salesChart.drawLine(json.averages.inventory, true); 
+
+        const priceChart = new LineChart(400, T, price_max, d3.select('#avgPrices'), 'Time', 'Price');
+        json.all.price.forEach( x => priceChart.drawLine(x, false));
+        priceChart.drawLine(json.averages.price, true);
+
+        const endProbabilityChart = new LineChart(400, T, 1, d3.select('#endProbability'), 'Time', 'Sale Probability');
+        endProbabilityChart.drawLine(json.averages.end_probability, true); 
+
+        d3.selectAll('.axis').moveToFront();
       });
   });
 }
