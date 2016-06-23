@@ -9,6 +9,10 @@ import numpy as np
 static_assets_path = path.join(path.dirname(__file__), "html")
 app = Flask(__name__, static_folder=static_assets_path)
 
+def mean(l):
+  _l = list(l)
+  return sum(_l) / len(_l)
+
 _, sales_model_coef = make_model(*generate_train_data(1000, 100))
 competitor_prices = np.array([11., 13., 14., 16., 18.])
 def make_price_optimizer(sales_model_coef, competitor_prices,
@@ -31,11 +35,13 @@ def run_simulations(iterations, T, N, L, Z, delta, price_range, ):
 
   L = optimizer.L
   Z = optimizer.Z
+
+  price_history = np.zeros((iterations, T))
+  profit_history = np.zeros((iterations, T))
+  competitor_prices_history = np.zeros((iterations, T, competitor_prices.size))
+  inventory_history = np.zeros((iterations, T))
   
   for i in range(iterations):
-    price_history = []
-    competitor_prices_history = []
-    accumulated_sales = []
 
     profit = 0
     n = N
@@ -47,9 +53,10 @@ def run_simulations(iterations, T, N, L, Z, delta, price_range, ):
       n = n - sales
       profit += price * sales - L * n
 
-      price_history.append(price)
-      accumulated_sales.append(N - n)
-      competitor_prices_history.append(competitor_prices.tolist())
+      price_history[i,t] = price
+      inventory_history[i,t] = n
+      competitor_prices_history[i,t,:] = competitor_prices
+      profit_history[i,t] = profit
 
       # # Change competitor prices
       # competitor_prices = competitor_prices * np.random.uniform(0.8, 1.2, 5)
@@ -57,15 +64,23 @@ def run_simulations(iterations, T, N, L, Z, delta, price_range, ):
 
     # Realize salvage profits
     profit += n * Z
-    
-    results.append({
-      'self': price_history,
-      'competitors': competitor_prices_history,
-      'sales': accumulated_sales,
-      'profit': profit,
-    })
 
-  return results
+  averages = {
+    'price': np.nan_to_num(np.sum(price_history, axis=0) / np.sum(price_history > 0, axis=0)).tolist(),
+    'inventory': np.mean(inventory_history, axis=0).tolist(),
+    'profit': np.mean(profit_history, axis=0).tolist(),
+    'end_probability': (np.sum(inventory_history == 0, axis=0) / iterations).tolist()
+  }
+
+  return {
+    'all': {
+      'price': price_history.tolist(),
+      'inventory': inventory_history.tolist(),
+      'profit': profit_history.tolist(),
+      'competitors': competitor_prices_history.tolist()
+    },
+    'averages': averages
+  }
 
 
 @app.route('/')

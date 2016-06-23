@@ -135,14 +135,13 @@ class PricingPolicyChart extends LineChart {
 
 class SimulationResultChart extends LineChart {
   drawLine(prices) {
-
-  this.svg.append('path')
-    .attr('class', 'sim-line')
-    .attr('stroke', 'whitesmoke')
-    // .on('mouseover', mouseOver)
-    // .on('mouseout', mouseOut)
-    // .on('mousemove', mouseMove)
-    .attr('d', this.line(prices));
+    this.svg.append('path')
+      .attr('class', 'sim-line')
+      .attr('stroke', 'whitesmoke')
+      // .on('mouseover', mouseOver)
+      // .on('mouseout', mouseOut)
+      // .on('mousemove', mouseMove)
+      .attr('d', this.line(prices));
   }
 }
 
@@ -244,7 +243,7 @@ $(document).ready(function(){
   const min_price = 10;
   const max_price = 20;
   const price_steps = 0.1;
-  const counts = 12;
+  const counts = 100;
 
   function randomArray(length) {
     return Array.apply(null, Array(length)).map(function(_, i) {
@@ -272,16 +271,20 @@ $(document).ready(function(){
         body: JSON.stringify({ T, N, L, Z, delta, min_price, max_price, price_steps, counts }),
         headers: { 'Content-Type': 'application/json' },
       }).then(res => res.json())
-        .then(result => {
+        .then(json => {
 
-        profits = []
-        sims = []
-        result.forEach( row => {
-          profits.push(row.profit);
+        let results = [];
+        for (let i = 0; i < counts; i++) {
+          results[i] = {
+            profit: json.all.profit[i][json.all.profit[i].length - 1],
+            self: json.all.price[i],
+          };
+        }
 
+        results.slice(0, 12).forEach(row => {
           const newDiv = $('<div></div>')
             .addClass('col-md-3')
-            .addClass('text-center')
+            .addClass('text-center');
           $('#sim').append(newDiv);
 
           chart = new SimulationResultChart(200, T, N, max_price, d3.select(newDiv.get()[0]))
@@ -302,22 +305,10 @@ $(document).ready(function(){
 
         });
 
-        function irwinHallDistribution(n, m) {
-          var distribution = [];
-          for (var i = 0; i < n; i++) {
-            for (var s = 0, j = 0; j < m; j++) {
-              s += Math.random();
-            }
-            distribution.push(s / m);
-          }
-          return distribution;
-        }
-
         d3.select("#histogram")
-            .datum(irwinHallDistribution(10000, 10))
-            // .datum(profits)
+          .datum(results.map(a => a.profit))
           .call(histogramChart()
-            .bins(d3.scale.linear().ticks(20))
+            .bins(10)
             .tickFormat(d3.format(".02f")));
       })
   })
