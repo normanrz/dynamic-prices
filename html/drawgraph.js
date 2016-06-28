@@ -168,7 +168,7 @@ class PricingPolicyChart extends LineChart {
 }
 
 function histogramChart() {
-  let margin = { top: 0, right: 0, bottom: 20, left: 0 },
+  let margin = { top: 20, right: 0, bottom: 20, left: 0 },
       width = 960,
       height = 500;
 
@@ -179,6 +179,9 @@ function histogramChart() {
 
   function chart(selection) {
     selection.each(function(data) {
+      const average = data.reduce((a, b) => (a + b)) / data.length;
+
+      const oldData = data;
 
       // Compute the histogram.
       data = histogram(data);
@@ -207,6 +210,15 @@ function histogramChart() {
       var g = svg.select("g")
           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+      const xAvg = d3.scale.linear().domain([d3.min(data, d => d.x), d3.max(data, d => d.x)]).range([0, width]);
+
+      svg.append("line")
+        .style("stroke", "black")
+        .attr("x1", xAvg(average))
+        .attr("y1", -10)
+        .attr("x2", xAvg(average))
+        .attr("y2", 510);
+
       // Update the bars.
       var bar = svg.select(".bars").selectAll(".bar").data(data);
       bar.enter().append("rect");
@@ -221,6 +233,7 @@ function histogramChart() {
       g.select(".x.axis")
           .attr("transform", "translate(0," + y.range()[0] + ")")
           .call(xAxis);
+
     });
   }
 
@@ -352,7 +365,6 @@ function fetchAll(options) {
           .call(histogramChart()
           .bins(20)
           .tickFormat(d3.format(".02f")));
-
 
         const summaryChartsHeight = 300;
         // draw other line charts
