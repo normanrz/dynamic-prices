@@ -1,15 +1,30 @@
-function NumericInput({ value, label, onChange }) {
-  return <div className="form-group col-md-3">
-    <div className="input-group">
-      <span className="input-group-addon">{label}</span>
-      <input
-        type="text"
-        className="form-control"
-        value={value}
-        onChange={e => { onChange(parseFloat(e.target.value)); }}
-      />
-    </div>
-  </div>;
+class NumericInput extends React.Component {
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.value !== this.props.value) {
+      this.setState({ value: nextProps.value });
+    }
+  }
+
+  handleChange(e) {
+    let value = e.target.value;
+    this.setState({ value });
+    this.props.onChange(parseFloat(value));
+  }
+
+  render() {
+    return <div className="form-group col-md-3">
+      <div className="input-group">
+        <span className="input-group-addon">{this.props.label}</span>
+        <input
+          type="text"
+          className="form-control"
+          value={this.state ? this.state.value : this.props.value}
+          onChange={this.handleChange.bind(this)}
+        />
+      </div>
+    </div>;
+  }
 }
 
 function range(n) {
