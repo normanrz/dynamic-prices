@@ -272,14 +272,24 @@ function fetchAll(options) {
           </div>
         </div>
         <h3 class="text-center">Profits summary</h3>
-        <h4 class="text-center">Average Prices</h4>
-        <div class="row" id="avgPrices"></div>
-        <h4 class="text-center">Average Inventory</h4>
-        <div class="row" id="avgInventory"></div>
-        <h4 class="text-center">Average Profit</h4>
-        <div class="row" id="avgProfit"></div>
-        <h4 class="text-center">Sales Probability</h4>
-        <div class="row" id="endProbability"></div>
+        <div class="row">
+          <div class="col-md-6">
+            <h4 class="text-center">Average Prices</h4>
+            <div class="row" id="avgPrices"></div>
+          </div>
+          <div class="col-md-6">
+            <h4 class="text-center">Average Inventory</h4>
+            <div class="row" id="avgInventory"></div>
+          </div>
+          <div class="col-md-6">
+            <h4 class="text-center">Average Profit</h4>
+            <div class="row" id="avgProfit"></div>
+          </div>
+          <div class="col-md-6">
+            <h4 class="text-center">Sales Probability</h4>
+            <div class="row" id="endProbability"></div>
+          </div>
+        </div>
         <h4 class="text-center">Profit histogram</h4>
         <div class="row" id="histogram"></div>
         <h3 class="text-center">Simulations</h3> 
@@ -343,20 +353,22 @@ function fetchAll(options) {
           .bins(20)
           .tickFormat(d3.format(".02f")));
 
+
+        const summaryChartsHeight = 300;
         // draw other line charts
-        const salesChart = new LineChart(400, T, N, d3.select('#avgInventory'), 'Time', 'Items');
+        const salesChart = new LineChart(summaryChartsHeight, T, N, d3.select('#avgInventory'), 'Time', 'Items');
         json.all.inventory.forEach( x => salesChart.drawLine(x, false));
         salesChart.drawLine(json.averages.inventory, true); 
 
-        const priceChart = new LineChart(400, T, price_max, d3.select('#avgPrices'), 'Time', 'Price');
+        const priceChart = new LineChart(summaryChartsHeight, T, price_max, d3.select('#avgPrices'), 'Time', 'Price');
         json.all.price.forEach( x => priceChart.drawLine(x, false));
         priceChart.drawLine(json.averages.price, true);
 
-        const endProbabilityChart = new LineChart(400, T, 1, d3.select('#endProbability'), 'Time', 'Sale Probability');
+        const endProbabilityChart = new LineChart(summaryChartsHeight, T, 1, d3.select('#endProbability'), 'Time', 'Sale Probability');
         endProbabilityChart.drawLine(json.averages.end_probability, true);
 
         const maxProfitGuess = json.averages.profit[json.averages.profit.length - 1] * 1.5;
-        const profitChart = new LineChart(400, T, maxProfitGuess, d3.select('#avgProfit'), 'Time', 'Profit');
+        const profitChart = new LineChart(summaryChartsHeight, T, maxProfitGuess, d3.select('#avgProfit'), 'Time', 'Profit');
         json.all.profit.forEach( x => profitChart.drawLine(x, false));
         profitChart.drawLine(json.averages.profit, true); 
 
