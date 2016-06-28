@@ -261,24 +261,30 @@ function fetchAll(options) {
   })
     .then(res => res.json())
     .then(result => {
-      $("#diagrams").html(
-        '<div class="row">' +
-          '<h3 class="text-center">Optimal Pricing Policy</h3>' +
-          '<div class="col-xs-12 col-md-10">' +
-            '<div id="pricingpolicy"></div> ' +
-          '</div>' +
-          '<div class="col-xs-12 col-md-2">' +
-            '<h4>Select N</h4><div id="selectN"></div>' +
-          '</div>' +
-        '</div>' +
-        '<h3 class="text-center">Simulations</h3>' +
-        '<div class="row" id="sim"></div>' +
-        '<h3 class="text-center">Profits summary</h3>' +
-        '<div class="row" id="avgPrices"></div>' +
-        '<div class="row" id="avgInventory"></div>' +
-        '<div class="row" id="avgProfit"></div>' +
-        '<div class="row" id="endProbability"></div>' +
-        '<div class="row" id="histogram"></div>');
+      $("#diagrams").html(`
+        <div class="row">
+          <h3 class="text-center">Optimal Pricing Policy</h3>
+          <div class="col-xs-12 col-md-10">
+            <div id="pricingpolicy"></div> 
+          </div>
+          <div class="col-xs-12 col-md-2">
+            <h4>Select N</h4><div id="selectN"></div>
+          </div>
+        </div>
+        <h3 class="text-center">Profits summary</h3>
+        <h4 class="text-center">Average Prices</h4>
+        <div class="row" id="avgPrices"></div>
+        <h4 class="text-center">Average Inventory</h4>
+        <div class="row" id="avgInventory"></div>
+        <h4 class="text-center">Average Profit</h4>
+        <div class="row" id="avgProfit"></div>
+        <h4 class="text-center">Sales Probability</h4>
+        <div class="row" id="endProbability"></div>
+        <h4 class="text-center">Profit histogram</h4>
+        <div class="row" id="histogram"></div>
+        <h3 class="text-center">Simulations</h3> 
+        <div class="row" id="sim"></div>`);
+
 
       let pricingPolicyChart = new PricingPolicyChart(400, T, price_max, d3.select('#pricingpolicy'), 'Time', 'Price');
       
@@ -347,7 +353,7 @@ function fetchAll(options) {
         priceChart.drawLine(json.averages.price, true);
 
         const endProbabilityChart = new LineChart(400, T, 1, d3.select('#endProbability'), 'Time', 'Sale Probability');
-        endProbabilityChart.drawLine(json.averages.end_probability, true); 
+        endProbabilityChart.drawLine(json.averages.end_probability, true);
 
         const maxProfitGuess = json.averages.profit[json.averages.profit.length - 1] * 1.5;
         const profitChart = new LineChart(400, T, maxProfitGuess, d3.select('#avgProfit'), 'Time', 'Profit');
