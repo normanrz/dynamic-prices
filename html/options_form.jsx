@@ -39,13 +39,12 @@ class OptionsForm extends React.Component {
       T: 20,
       N: 20,
       L: 1,
-      delta: 0.99,
+      delta: 1,
       Z: 1,
       price_min: 10,
       price_max: 20,
       price_step: 0.1,
-      competitors: [11, 13, 14, 16, 18],
-      coef: range(6).map(() => Math.random()),
+      competitors: [11, 13, 14],
       counts: 100,
     };
   }
@@ -106,18 +105,6 @@ class OptionsForm extends React.Component {
           value={this.state.price_step}
           onChange={this.makeChangeHandler('price_step')}
         />
-      </div>
-      <div className="row">
-        {
-          this.state.coef.map((coef, i) => 
-            <NumericInput
-              key={i}
-              label={'C' + i}
-              value={coef}
-              onChange={this.makeChangeHandler(['coef', i])}
-            />
-          )
-        }
       </div>
       <div className="row">
         {

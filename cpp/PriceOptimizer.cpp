@@ -159,10 +159,11 @@ double PriceOptimizer::sales_model(double price, int t) {
     1,
     double(rank(price, competitor_prices)),
     price - *std::min_element(competitor_prices.begin(), competitor_prices.end()),
-    double(rank(price, competitor_prices)),
-    (price + std::accumulate(competitor_prices.begin(), competitor_prices.end(), 0)) / (1 + competitor_prices.size()),
+    price,
     double(t),
-    double(t * t)
+    double(t * t),
+    double(t * rank(price, competitor_prices)),
+    std::sqrt(t)
   };
   // print_vec(x);
   // std::cout << predict_linear_regression(x, sales_model_coef) << std::endl;
