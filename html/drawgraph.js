@@ -8,7 +8,7 @@ const tooltip = d3.select('body').append('div')
   .attr('class', 'tooltip')       
   .style('opacity', 0); 
 
-const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+const margin = { top: 30, right: 30, bottom: 30, left: 30 };
 
 class LineChart {
   constructor(height, xMax, yMax, divToDraw, xLabel, yLabel) {
@@ -299,7 +299,7 @@ function fetchAll(options) {
             <div class="row" id="avgProfit"></div>
           </div>
           <div class="col-md-6">
-            <h4 class="text-center">Sales Probability</h4>
+            <h4 class="text-center">Out Of Stock Probability</h4>
             <div class="row" id="endProbability"></div>
           </div>
         </div>
@@ -376,7 +376,7 @@ function fetchAll(options) {
         json.all.price.forEach( x => priceChart.drawLine(x, false));
         priceChart.drawLine(json.averages.price, true);
 
-        const endProbabilityChart = new LineChart(summaryChartsHeight, T, 1, d3.select('#endProbability'), 'Time', 'Sale Probability');
+        const endProbabilityChart = new LineChart(summaryChartsHeight, T, 1, d3.select('#endProbability'), 'Time', 'Probability');
         endProbabilityChart.drawLine(json.averages.end_probability, true);
 
         const maxProfitGuess = json.averages.profit[json.averages.profit.length - 1] * 1.5;
