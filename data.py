@@ -36,6 +36,13 @@ def generate_train_data(B, T, price_range):
 
     return (X, Y)
 
+def change_competitor_prices(inital_competitor_prices):
+    competitor_prices = [inital_competitor_prices]
+    for i in range(5):
+        competitor_prices.append(
+            competitor_prices[-1] * np.random.uniform(0.98, 1.2, inital_competitor_prices.size))
+    return competitor_prices
+
 # Train sales probability model
 def make_model(X, Y):
     regr = linear_model.LinearRegression()
