@@ -101,6 +101,7 @@ class PricingPolicyChart extends LineChart {
       $(`#selectN div[n='${focusLine.attr('id')}'`)
         .css('color', 'white')
         .css('background-color', 'grey');
+      console.log(n);
       $("#selectN").scrollTop($("#selectN").scrollTop() + $(`#selectN div[n='${focusLine.attr('id')}'`).position().top - 150 );
 
     }
@@ -219,7 +220,14 @@ function histogramChart() {
         .attr("x1", xAvg(average))
         .attr("y1", -10)
         .attr("x2", xAvg(average))
-        .attr("y2", 510);
+        .attr("y2", 500 - margin.bottom);
+
+      svg.append("text")
+        .attr('x', xAvg(average) + 5)
+        .attr('y', 10)
+        .text(`avg: ~ ${average.toFixed(2)}`)
+        .attr('font-size', '10px');
+
 
       // Update the bars.
       var bar = svg.select(".bars").selectAll(".bar").data(data);
