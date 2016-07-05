@@ -13,12 +13,12 @@ def mean(l):
   _l = list(l)
   return sum(_l) / len(_l)
 
-_, sales_model_coef = make_model(*generate_train_data(1000, 100))
-competitor_prices = np.array([11., 13., 14., 16., 18.])
-def make_price_optimizer(sales_model_coef, competitor_prices,
+competitor_prices = np.array([11, 13, 14], dtype=np.float64)
+def make_price_optimizer(competitor_prices,
     T=20, N=15,
     price_range=np.arange(10, 20, 0.1), 
     L=0.01, delta=0.99, Z=0.5):
+  _, sales_model_coef = make_model(*generate_train_data(1000, T, price_range))
   po = PriceOptimizer(T, N)
   po.L = L
   po.Z = Z
@@ -28,10 +28,10 @@ def make_price_optimizer(sales_model_coef, competitor_prices,
   po.sales_model_coef = sales_model_coef
   return po
 
-def run_simulations(iterations, T, N, L, Z, delta, price_range, ):
+def run_simulations(iterations, T, N, L, Z, delta, price_range):
 
   results = []
-  optimizer = make_price_optimizer(sales_model_coef, competitor_prices, T=T, N=N, Z=Z, L=L, delta=delta, price_range=price_range)
+  optimizer = make_price_optimizer(competitor_prices, T=T, N=N, Z=Z, L=L, delta=delta, price_range=price_range)
 
   L = optimizer.L
   Z = optimizer.Z
@@ -91,25 +91,6 @@ def index():
 def send_static_files(path):
   return send_from_directory(static_assets_path, path)
 
-@app.route('/api/pricing_policy', methods=['POST'])
-def pricing_policy():
-  options = request.get_json()
-  T = options['T']
-  N = options['N']
-  Z = options['Z']
-  L = options['L']
-  delta = options['delta']
-  price_min = options['price_min']
-  price_max = options['price_max']
-  price_step = options['price_step']
-  price_range = np.arange(price_min, price_max, price_step)
-
-  po = make_price_optimizer(sales_model_coef, competitor_prices, T=T, N=N, Z=Z, L=L, delta=delta, price_range=price_range)
-  result = list(map(lambda n: { 
-    'n': n, 
-    'prices': list(map(lambda t: po.run(t, n)[0], range(1, T + 1))) 
-  }, range(1, N + 1)))
-  return Response(json.dumps(result),  mimetype='application/json')
 
 @app.route('/api/simulations', methods=['POST'])
 def simulations():
@@ -123,11 +104,18 @@ def simulations():
   price_min = options['price_min']
   price_max = options['price_max']
   price_step = options['price_step']
-  price_range = np.arange(price_min, price_max, price_step)
+  price_range = np.arange(price_min, price_max, price_step, dtype=np.float64)
   iterations = options['counts']
 
-  results = run_simulations(iterations, T=T, N=N, Z=Z, L=L, delta=delta, price_range=price_range,  )
-  return Response(json.dumps(results),  mimetype='application/json')
+  po = make_price_optimizer(competitor_prices, T=T, N=N, Z=Z, L=L, delta=delta, price_range=price_range)
+  result = {
+    'policy': list(map(lambda n: { 
+        'n': n, 
+        'prices': list(map(lambda t: po.run(t, n)[0], range(1, T + 1)))
+      }, range(1, N + 1))),
+    'simulation': run_simulations(iterations, T=T, N=N, Z=Z, L=L, delta=delta, price_range=price_range)
+  }
+  return Response(json.dumps(result),  mimetype='application/json')
 
 if __name__ == "__main__":
   # Start the server
