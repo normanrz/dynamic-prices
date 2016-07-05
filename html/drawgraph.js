@@ -8,7 +8,7 @@ const tooltip = d3.select('body').append('div')
   .attr('class', 'tooltip')       
   .style('opacity', 0); 
 
-const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+const margin = { top: 30, right: 30, bottom: 30, left: 30 };
 
 class LineChart {
   constructor(height, xMax, yMax, divToDraw, xLabel, yLabel) {
@@ -101,6 +101,8 @@ class PricingPolicyChart extends LineChart {
       $(`#selectN div[n='${focusLine.attr('id')}'`)
         .css('color', 'white')
         .css('background-color', 'grey');
+      $("#selectN").scrollTop($("#selectN").scrollTop() + $(`#selectN div[n='${focusLine.attr('id')}'`).position().top - 150 );
+
     }
 
     const self = this;
@@ -168,7 +170,7 @@ class PricingPolicyChart extends LineChart {
 }
 
 function histogramChart() {
-  let margin = { top: 0, right: 0, bottom: 20, left: 0 },
+  let margin = { top: 20, right: 0, bottom: 20, left: 0 },
       width = 960,
       height = 500;
 
@@ -179,6 +181,9 @@ function histogramChart() {
 
   function chart(selection) {
     selection.each(function(data) {
+      const average = data.reduce((a, b) => (a + b)) / data.length;
+
+      const oldData = data;
 
       // Compute the histogram.
       data = histogram(data);
@@ -207,6 +212,15 @@ function histogramChart() {
       var g = svg.select("g")
           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+      const xAvg = d3.scale.linear().domain([d3.min(data, d => d.x), d3.max(data, d => d.x)]).range([0, width]);
+
+      svg.append("line")
+        .style("stroke", "black")
+        .attr("x1", xAvg(average))
+        .attr("y1", -10)
+        .attr("x2", xAvg(average))
+        .attr("y2", 510);
+
       // Update the bars.
       var bar = svg.select(".bars").selectAll(".bar").data(data);
       bar.enter().append("rect");
@@ -221,6 +235,7 @@ function histogramChart() {
       g.select(".x.axis")
           .attr("transform", "translate(0," + y.range()[0] + ")")
           .call(xAxis);
+
     });
   }
 
@@ -286,7 +301,7 @@ function fetchAll(options) {
             <div class="row" id="avgProfit"></div>
           </div>
           <div class="col-md-6">
-            <h4 class="text-center">Stockout Probability</h4>
+            <h4 class="text-center">Out Of Stock Probability</h4>
             <div class="row" id="endProbability"></div>
           </div>
         </div>
@@ -345,7 +360,6 @@ function fetchAll(options) {
         .bins(20)
         .tickFormat(d3.format(".02f")));
 
-
       const summaryChartsHeight = 300;
       // draw other line charts
       const salesChart = new LineChart(summaryChartsHeight, T, N, d3.select('#avgInventory'), 'Time', 'Items');
@@ -356,7 +370,7 @@ function fetchAll(options) {
       simulation.all.price.forEach( x => priceChart.drawLine(x, false));
       priceChart.drawLine(simulation.averages.price, true);
 
-      const endProbabilityChart = new LineChart(summaryChartsHeight, T, 1, d3.select('#endProbability'), 'Time', 'Sale Probability');
+      const endProbabilityChart = new LineChart(summaryChartsHeight, T, 1, d3.select('#endProbability'), 'Time', 'Probability');
       endProbabilityChart.drawLine(simulation.averages.end_probability, true);
 
       const maxProfitGuess = simulation.averages.profit[simulation.averages.profit.length - 1] * 1.5;
@@ -365,7 +379,8 @@ function fetchAll(options) {
       profitChart.drawLine(simulation.averages.profit, true); 
 
       d3.selectAll('.axis').moveToFront();
-  });
+
+    });
 }
 
 $(document).ready(function() {
