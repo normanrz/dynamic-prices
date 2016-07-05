@@ -101,6 +101,8 @@ class PricingPolicyChart extends LineChart {
       $(`#selectN div[n='${focusLine.attr('id')}'`)
         .css('color', 'white')
         .css('background-color', 'grey');
+      $("#selectN").scrollTop($("#selectN").scrollTop() + $(`#selectN div[n='${focusLine.attr('id')}'`).position().top - 150 );
+
     }
 
     const self = this;
