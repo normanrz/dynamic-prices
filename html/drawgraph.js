@@ -4,7 +4,8 @@ d3.selection.prototype.moveToFront = function() {
   });
 };
 
-let points = [[0.01, 1], [1/3, 1.5], [2/3, 3], [1, 5]];
+let salesPoints = [[0.01, 2], [1/3, 4], [2/3, 6], [1, 8]];
+let rankPoints = [[0.01, .2], [1/3, .4], [2/3, .6], [1, .8]];
 
 const tooltip = d3.select('body').append('div') 
   .attr('class', 'tooltip')       
@@ -296,8 +297,8 @@ function histogramChart() {
 
 function fetchAll(options) {
   let { T, N, price_max, counts } = options;
-  options.time_model = points.map(a => a[1]);
-  options.rank_model = points.map(a => a[1]);
+  options.time_model = salesPoints.map(a => a[1]);
+  options.rank_model = rankPoints.map(a => a[1]);
   $('#diagrams').html('<span class="glyphicon glyphicon-refresh spinning" aria-hidden="true"></span>');
   setTimeout(function () {
     fetch('/api/simulations', { 
@@ -419,7 +420,7 @@ function fetchAll(options) {
 }
 
 function makeDrawableGraph(pts) {
-  let points = pts.slice(0);
+  let points = pts;
   let dragged;
   let selected;
 
@@ -490,7 +491,6 @@ function makeDrawableGraph(pts) {
         .on("mouseup", mouseup);
 
     function redraw() {
-
       points = pointsCoordinates.map(p => [x.invert(p[0]), y.invert(p[1])]);
       svg.select("path").attr("d", line);
 
@@ -537,11 +537,9 @@ function makeDrawableGraph(pts) {
 
 
 $(document).ready(function() {
-  const salesPoints = [[0.01, 2], [1/3, 4], [2/3, 6], [1, 8]];
   let drawableMaxSalesGraph = makeDrawableGraph(salesPoints);
   drawableMaxSalesGraph('#userDrawGraph', '#maxSales', 10);
 
-  let rankPoints = [[0.01, .2], [1/3, .4], [2/3, .6], [1, .8]];
   let drawAbleRankGraph = makeDrawableGraph(rankPoints);
   drawAbleRankGraph('#userDrawGraph2', 'max rank to sell');
 
