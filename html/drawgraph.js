@@ -13,7 +13,7 @@ const tooltip = d3.select('body').append('div')
 const margin = { top: 30, right: 30, bottom: 30, left: 30 };
 
 class LineChart {
-  constructor(height, xMax, yMax, divToDraw, xLabel, yLabel) {
+  constructor(height, xMax, yMax, divToDraw, xLabel, yLabel, yMin = 0) {
     this.data = [];
     this.width = divToDraw.node().getBoundingClientRect().width - margin.left - margin.right;
     this.height = height - margin.top - margin.bottom;
@@ -23,7 +23,7 @@ class LineChart {
       .range([0, this.width]);
       
     this.y = d3.scale.linear()
-      .domain([0, yMax])
+      .domain([yMin, yMax])
       .range([this.height, 0]);
 
     const xAxis = d3.svg.axis()
@@ -47,7 +47,7 @@ class LineChart {
 
     this.svg.append('g')
       .attr('class', 'x axis')
-      .attr('transform', `translate(-1, ${(this.height + 1)})`)
+      .attr('transform', `translate(-1, ${( + 1 + this.y(0))})`)
       .call(xAxis)
     .append('text')
       .attr('x', this.width)
@@ -405,7 +405,12 @@ function fetchAll(options) {
         endProbabilityChart.drawLine(simulation.averages.end_probability, true);
 
         const maxProfitGuess = simulation.averages.profit[simulation.averages.profit.length - 1] * 1.5;
-        const profitChart = new LineChart(summaryChartsHeight, T, maxProfitGuess, d3.select('#avgProfit'), 'Time', 'Profit');
+        const minProfitGuess = -simulation.averages.profit[simulation.averages.profit.length - 1] * 0.5;
+
+        const yMin = Math.min(maxProfitGuess, minProfitGuess);
+        const yMax = Math.max(maxProfitGuess, minProfitGuess);
+
+        const profitChart = new LineChart(summaryChartsHeight, T, yMax, d3.select('#avgProfit'), 'Time', 'Profit', yMin);
         simulation.all.profit.forEach( x => profitChart.drawLine(x, false));
         profitChart.drawLine(simulation.averages.profit, true); 
 
