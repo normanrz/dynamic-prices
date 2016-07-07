@@ -430,8 +430,8 @@ function chooseStuff() {
 
   var svg = d3.select("#userDrawGraph").append("svg")
       .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .attr("tabindex", 1);
+      .attr("height", height + margin.top + margin.bottom);
+      // .attr("tabindex", 1);
 
   svg.append("rect")
       .attr("width", width + margin.left + margin.right)
@@ -477,7 +477,7 @@ function chooseStuff() {
       .on("mousemove", mousemove)
       .on("mouseup", mouseup);
 
-  svg.node().focus();
+  // svg.node().focus();
 
   function redraw() {
 
