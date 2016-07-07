@@ -11,6 +11,7 @@ def rank(a, p):
 
 def make_X(price, competitor_prices, t, T):
     _t = t / T
+    _rank = rank(price, competitor_prices) / competitor_prices.shape[0];
     return np.array([
             rank(price, competitor_prices),
             price - competitor_prices.min(),
@@ -22,14 +23,18 @@ def make_X(price, competitor_prices, t, T):
             (1 - _t) * (1 - _t) * (1 - _t),
             _t * (1 - _t) * (1 - _t),
             _t * _t * (1 - _t),
-            _t * _t * _t
+            _t * _t * _t,
+            (1 - _rank) * (1 - _rank) * (1 - _rank),
+            _rank * (1 - _rank) * (1 - _rank),
+            _rank * _rank * (1 - _rank),
+            _rank * _rank * _rank
         ])
 
-def generate_train_data(B, T, price_range, time_model):
+def generate_train_data(B, T, price_range, time_model, rank_model):
     our_price = np.random.choice(price_range, (B * T, 1))
     competitor_prices = np.random.choice(price_range, (B * T, 3))
     
-    X = np.zeros((B * T, 11))
+    X = np.zeros((B * T, 15))
     Y = np.zeros(B * T)
     for t in range(T):
         for i in range(B):
@@ -39,7 +44,7 @@ def generate_train_data(B, T, price_range, time_model):
 
             _rank = rank(our_price[index], competitor_prices[index])
             y = (time_model[0] * x[7] + time_model[1] * 3 * x[8] + time_model[2] * 3 * x[9] + time_model[3] * x[10]) + \
-                2 * (competitor_prices.shape[1] - _rank - 1)
+                (rank_model[0] * x[11] + rank_model[1] * 3 * x[12] + rank_model[2] * 3 * x[13] + rank_model[3] * x[14])
             Y[index] = y * np.random.uniform(0, 1)
 
     return (X, Y)

@@ -46,7 +46,6 @@ class OptionsForm extends React.Component {
       price_step: 0.1,
       competitors: [11, 13, 14],
       counts: 100,
-      time_model: [0.2, 0.3, 0.6, 1],
     };
   }
 

@@ -156,6 +156,7 @@ std::pair<double, double> PriceOptimizer::run(int t, int n) {
 
 double PriceOptimizer::sales_model(double price, int t) {
   double _t = double(t) / T;
+  double _rank = double(rank(price, competitor_prices)) / competitor_prices.size();
   std::vector<double> x = {
     1,
     double(rank(price, competitor_prices)),
@@ -168,7 +169,11 @@ double PriceOptimizer::sales_model(double price, int t) {
     double((1 - _t) * (1 - _t) * (1 - _t)),
     double(_t * (1 - _t) * (1 - _t)),
     double(_t * _t * (1 - _t)),
-    double(_t * _t * _t)
+    double(_t * _t * _t),
+    double((1 - _rank) * (1 - _rank) * (1 - _rank)),
+    double(_rank * (1 - _rank) * (1 - _rank)),
+    double(_rank * _rank * (1 - _rank)),
+    double(_rank * _rank * _rank)
   };
   // print_vec(x);
   // std::cout << predict_linear_regression(x, sales_model_coef) << std::endl;

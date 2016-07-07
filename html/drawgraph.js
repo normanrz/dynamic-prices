@@ -297,6 +297,7 @@ function histogramChart() {
 function fetchAll(options) {
   let { T, N, price_max, counts } = options;
   options.time_model = points.map(a => a[1]);
+  options.rank_model = points.map(a => a[1]);
   $('#diagrams').html('<span class="glyphicon glyphicon-refresh spinning" aria-hidden="true"></span>');
   setTimeout(function () {
     fetch('/api/simulations', { 
