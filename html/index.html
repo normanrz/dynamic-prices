@@ -88,31 +88,31 @@
 			    to { -webkit-transform: rotate(360deg); }
 			}
 
-			#userDrawGraph rect {
+			.userDraw rect {
 			  fill: none;
 			  pointer-events: all;
 			}
 
-			#userDrawGraph circle, #userDrawGraph .line {
+			.userDraw circle, .userDraw .line {
 			  fill: none;
 			  stroke: grey;
 			  stroke-width: 1.5px;
 			}
 
-			#userDrawGraph circle {
+			.userDraw circle {
 			  fill: grey;
 			  fill-opacity: .2;
 			  cursor: move;
 			}
 
-			#userDrawGraph .axis path,
-			#userDrawGraph .axis line {
+			.userDraw .axis path,
+			.userDraw .axis line {
 			  fill: none;
 			  stroke: #000;
 			  shape-rendering: crispEdges;
 			}
 
-			#userDrawGraph .axis {
+			.userDraw .axis {
 				font-size: 0.5em;
 			}
 		</style>
@@ -124,7 +124,8 @@
 			</div>
 			<div id="options_form"></div>
 			<div class="row">
-				<div class="col-md-6" id="userDrawGraph"></div>
+				<div class="col-md-6 userDraw" id="userDrawGraph"></div>
+				<div class="col-md-6 userDraw" id="userDrawGraph2"></div>
 			</div>
 			<div id="diagrams"></div>
 

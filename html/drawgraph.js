@@ -4,7 +4,7 @@ d3.selection.prototype.moveToFront = function() {
   });
 };
 
-let points = [[0.01, 1], [1/3, 1.5], [2/3, 3], [1, 5]];
+let points = {'sales': [[0.01, 2], [1/3, 4], [2/3, 6], [1, 8]], 'rank': [[0.01, .2], [1/3, .4], [2/3, .6], [1, .8]]}
 
 const tooltip = d3.select('body').append('div') 
   .attr('class', 'tooltip')       
@@ -293,11 +293,14 @@ function histogramChart() {
   return chart;
 }
 
-
 function fetchAll(options) {
   let { T, N, price_max, counts } = options;
-  options.time_model = points.map(a => a[1]);
-  options.rank_model = points.map(a => a[1]);
+  options.time_model = points.sales.map(a => a[1]);
+  options.rank_model = points.rank.map(a => a[1]);
+
+  console.log(points.sales[1][1]);
+  console.log(points.rank[1][1]);
+
   $('#diagrams').html('<span class="glyphicon glyphicon-refresh spinning" aria-hidden="true"></span>');
   setTimeout(function () {
     fetch('/api/simulations', { 
@@ -418,29 +421,31 @@ function fetchAll(options) {
   }, 1);
 }
 
-function chooseStuff() {
+function makeDrawableGraph(pointsAttr, selectorString, yLabel, maxY = 1) {
+  let dragged;
+  let selected;
+
   const margin = { top: 30, right: 30, bottom: 30, left: 30 };
 
-  var width = $('#userDrawGraph').width() - margin.left - margin.right;
-  var height = 300  - margin.top - margin.bottom;
+  let width = $(selectorString).width() - margin.left - margin.right;
+  let height = 300  - margin.top - margin.bottom;
 
-  var x = d3.scale.linear()
+  let x = d3.scale.linear()
     .range([margin.left, width]);
-  var y = d3.scale.linear()
-    .domain([0, 10])
+  let y = d3.scale.linear()
+    .domain([0, maxY])
     .range([height,0]);
 
-  pointsCoordinates = points.map(p => [x(p[0]), y(p[1])]);
+  let pointsCoordinates = points[pointsAttr].map(p => [x(p[0]), y(p[1])]);
 
-  var dragged = null,
+  dragged = null,
       selected = pointsCoordinates[0];
 
-  var line = d3.svg.line().interpolate('basis');
+  let line = d3.svg.line().interpolate('basis');
 
-  var svg = d3.select("#userDrawGraph").append("svg")
+  let svg = d3.select(selectorString).append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom);
-      // .attr("tabindex", 1);
 
   svg.append("rect")
       .attr("width", width + margin.left + margin.right)
@@ -461,7 +466,6 @@ function chooseStuff() {
 
   svg.append('g')
     .attr('class', 'axis')
-    // .attr('transform', `translate(${margin.left}, ${(height + margin.top)})`)
     .attr('transform', `translate(0, ${(height + 3)})`)
     .call(xAxis)
   .append('text')
@@ -480,23 +484,17 @@ function chooseStuff() {
     .attr('y', 6)
     .attr('dy', '.71em')
     .style('text-anchor', 'end')
-    .text('#sales');
+    .text(yLabel);
 
-  d3.select(window)
+  svg
       .on("mousemove", mousemove)
       .on("mouseup", mouseup);
 
-  // svg.node().focus();
-
   function redraw() {
-
-    points = pointsCoordinates.map(p => [x.invert(p[0]), y.invert(p[1])]);
-
-    console.log(points);
-
+    points[pointsAttr] = pointsCoordinates.map(p => [x.invert(p[0]), y.invert(p[1])]);
     svg.select("path").attr("d", line);
 
-    var circle = svg.selectAll("circle")
+    let circle = svg.selectAll("circle")
         .data(pointsCoordinates, function(d) { return d; });
 
     circle.enter().append("circle")
@@ -520,7 +518,7 @@ function chooseStuff() {
 
   function mousemove() {
     if (!dragged) return;
-    var m = d3.mouse(svg.node());
+    let m = d3.mouse(svg.node());
     // dragged[0] = Math.max(0, Math.min(width, m[0]));
     dragged[1] = Math.max(0, Math.min(height, m[1]));
     redraw();
@@ -531,11 +529,11 @@ function chooseStuff() {
     mousemove();
     dragged = null;
   }
-
 }
 
 $(document).ready(function() {
-  chooseStuff();
+  makeDrawableGraph('sales' ,'#userDrawGraph', '#maxSales', 10);
+  makeDrawableGraph('rank', '#userDrawGraph2', 'max rank to sell');
 
   setTimeout(() => {
     let reactForm = ReactDOM.render(
