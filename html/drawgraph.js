@@ -407,11 +407,14 @@ function fetchAll(options) {
         const endProbabilityChart = new LineChart(summaryChartsHeight, T, 1, d3.select('#endProbability'), 'Time', 'Probability');
         endProbabilityChart.drawLine(simulation.averages.end_probability, true);
 
-        const maxProfitGuess = simulation.averages.profit[simulation.averages.profit.length - 1] * 1.5;
-        const minProfitGuess = -simulation.averages.profit[simulation.averages.profit.length - 1] * 0.5;
+        // const maxProfitGuess = simulation.averages.profit[simulation.averages.profit.length - 1] * 1.5;
+        // const minProfitGuess = -simulation.averages.profit[simulation.averages.profit.length - 1] * 0.5;
+        // const yMin = Math.min(maxProfitGuess, minProfitGuess);
+        // const yMax = Math.max(maxProfitGuess, minProfitGuess);
 
-        const yMin = Math.min(maxProfitGuess, minProfitGuess);
-        const yMax = Math.max(maxProfitGuess, minProfitGuess);
+        const tempAll = simulation.all.profit.reduce( (x, y) => x.concat(y));
+        const yMin = d3.min(tempAll);
+        const yMax = d3.max(tempAll);
 
         const profitChart = new LineChart(summaryChartsHeight, T, yMax, d3.select('#avgProfit'), 'Time', 'Profit', yMin);
         simulation.all.profit.forEach( x => profitChart.drawLine(x, false));
