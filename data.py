@@ -11,7 +11,6 @@ def rank(a, p):
 def make_X(price, competitor_prices, t, T):
     ranks = rank(price, competitor_prices)
     _ranks = ranks / competitor_prices.shape[1]
-    print(competitor_prices.shape)
     _t = t / T
 
     return np.vstack((
@@ -33,7 +32,6 @@ def make_X(price, competitor_prices, t, T):
     )).transpose()
 
 def generate_train_data(B, T, price_range, time_model, rank_model):
-
     our_price = np.random.choice(price_range, B * T)
     competitor_prices = np.random.choice(price_range, (B * T, 3))
 
