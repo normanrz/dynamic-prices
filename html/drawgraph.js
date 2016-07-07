@@ -412,8 +412,8 @@ let points = [[0.01, 2], [1/3, 4], [2/3, 6], [1, 8]];
 function chooseStuff() {
   const margin = { top: 30, right: 30, bottom: 30, left: 30 };
 
-  var width = 960 - margin.left - margin.right;
-  var height = 500  - margin.top - margin.bottom;
+  var width = $('#userDrawGraph').width() - margin.left - margin.right;
+  var height = 300  - margin.top - margin.bottom;
 
   var x = d3.scale.linear()
     .range([margin.left, width]);
@@ -496,7 +496,7 @@ function chooseStuff() {
       .transition()
         .duration(750)
         .ease("elastic")
-        .attr("r", 6.5);
+        .attr("r", 5);
 
     circle
         .classed("selected", function(d) { return d === selected; })
