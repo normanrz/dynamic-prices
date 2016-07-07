@@ -4,6 +4,8 @@ d3.selection.prototype.moveToFront = function() {
   });
 };
 
+let points = [[0.01, 1], [1/3, 1.5], [2/3, 3], [1, 5]];
+
 const tooltip = d3.select('body').append('div') 
   .attr('class', 'tooltip')       
   .style('opacity', 0); 
@@ -117,7 +119,7 @@ class PricingPolicyChart extends LineChart {
 
       $(`#selectN div[n='${focusLine.attr('id')}'`)
         .css('color', 'white')
-        .css('background-color', 'black');
+        .css('background-color', 'grey');
       console.log(n);
       $("#selectN").scrollTop($("#selectN").scrollTop() + $(`#selectN div[n='${focusLine.attr('id')}'`).position().top - 150 );
 
@@ -294,126 +296,134 @@ function histogramChart() {
 
 function fetchAll(options) {
   let { T, N, price_max, counts } = options;
-  fetch('/api/simulations', { 
-    method: 'POST', 
-    body: JSON.stringify(options), 
-    headers: { 'Content-Type': 'application/json' }
-  })
-    .then(res => res.json())
-    .then(({ policy, simulation }) => {
-      $("#diagrams").html(`
-        <div class="row">
-          <h3 class="text-center">Optimal Pricing Policy</h3>
-          <div class="col-xs-12 col-md-10">
-            <div id="pricingpolicy"></div> 
+  options.time_model = points.map(a => a[1]);
+  options.rank_model = points.map(a => a[1]);
+  $('#diagrams').html('<span class="glyphicon glyphicon-refresh spinning" aria-hidden="true"></span>');
+  setTimeout(function () {
+    fetch('/api/simulations', { 
+      method: 'POST', 
+      body: JSON.stringify(options), 
+      headers: { 'Content-Type': 'application/json' }
+    })
+      .then(res => res.json())
+      .then(({ policy, simulation }) => {
+        $("#diagrams").html(`
+          <div class="row">
+            <h3 class="text-center">Optimal Pricing Policy</h3>
+            <div class="col-xs-12 col-md-10">
+              <div id="pricingpolicy"></div> 
+            </div>
+            <div class="col-xs-12 col-md-2">
+              <h4>Select N</h4><div id="selectN"></div>
+            </div>
           </div>
-          <div class="col-xs-12 col-md-2">
-            <h4>Select N</h4><div id="selectN"></div>
+          <h3 class="text-center">Simulation summary</h3>
+          <div class="row">
+            <div class="col-md-6">
+              <h4 class="text-center">Average Prices</h4>
+              <div class="row" id="avgPrices"></div>
+            </div>
+            <div class="col-md-6">
+              <h4 class="text-center">Average Inventory</h4>
+              <div class="row" id="avgInventory"></div>
+            </div>
+            <div class="col-md-6">
+              <h4 class="text-center">Average Profit</h4>
+              <div class="row" id="avgProfit"></div>
+            </div>
+            <div class="col-md-6">
+              <h4 class="text-center">Out Of Stock Probability</h4>
+              <div class="row" id="endProbability"></div>
+            </div>
           </div>
-        </div>
-        <h3 class="text-center">Simulation summary</h3>
-        <div class="row">
-          <div class="col-md-6">
-            <h4 class="text-center">Average Prices</h4>
-            <div class="row" id="avgPrices"></div>
-          </div>
-          <div class="col-md-6">
-            <h4 class="text-center">Average Inventory</h4>
-            <div class="row" id="avgInventory"></div>
-          </div>
-          <div class="col-md-6">
-            <h4 class="text-center">Average Profit</h4>
-            <div class="row" id="avgProfit"></div>
-          </div>
-          <div class="col-md-6">
-            <h4 class="text-center">Out Of Stock Probability</h4>
-            <div class="row" id="endProbability"></div>
-          </div>
-        </div>
-        <h4 class="text-center">Profit histogram</h4>
-        <div class="row" id="histogram"></div>
-        <h3 class="text-center">Simulations</h3> 
-        <div class="row" id="sim"></div>`);
+          <h4 class="text-center">Profit histogram</h4>
+          <div class="row" id="histogram"></div>
+          <h3 class="text-center">Simulations</h3> 
+          <div class="row" id="sim"></div>`);
 
 
-      let pricingPolicyChart = new PricingPolicyChart(400, T, price_max, d3.select('#pricingpolicy'), 'Time', 'Price');
-      
-      policy.forEach(row => pricingPolicyChart.drawLine(row.prices, row.n));
+        let pricingPolicyChart = new PricingPolicyChart(400, T, price_max, d3.select('#pricingpolicy'), 'Time', 'Price');
+        
+        policy.forEach(row => pricingPolicyChart.drawLine(row.prices, row.n));
 
-      let results = [];
-      const competitors_count = simulation.all.competitors[0][0].length;
-      let competitorsIds = [];
-      for(let i = 0; i < competitors_count; i++)
-        competitorsIds.push(i);
-      for (let i = 0; i < counts; i++) {
-        results[i] = {
-          profit: simulation.all.profit[i][simulation.all.profit[i].length - 1],
-          self: simulation.all.price[i],
-          competitors: competitorsIds.map(j => simulation.all.competitors[i].map(c => c[j])),
+        let results = [];
+        const competitors_count = simulation.all.competitors[0][0].length;
+        let competitorsIds = [];
+        for(let i = 0; i < competitors_count; i++)
+          competitorsIds.push(i);
+        for (let i = 0; i < counts; i++) {
+          results[i] = {
+            profit: simulation.all.profit[i][simulation.all.profit[i].length - 1],
+            self: simulation.all.price[i],
+            competitors: competitorsIds.map(j => simulation.all.competitors[i].map(c => c[j])),
+          }
         }
-      }
 
-      results.slice(0, 12).forEach(row => {
-        const newDiv = $('<div></div>')
-          .addClass('col-md-3')
-          .addClass('text-center');
-        $('#sim').append(newDiv);
+        results.slice(0, 12).forEach(row => {
+          const newDiv = $('<div></div>')
+            .addClass('col-md-3')
+            .addClass('text-center');
+          $('#sim').append(newDiv);
 
-        let chart = new LineChart(200, T, price_max, d3.select(newDiv.get()[0]), 'Time', 'Price');
-        row.competitors.forEach( c => chart.drawLine(c, false));
-        chart.drawLine(row.self, true);
+          let chart = new LineChart(200, T, price_max, d3.select(newDiv.get()[0]), 'Time', 'Price');
+          row.competitors.forEach( c => chart.drawLine(c, false));
+          chart.drawLine(row.self, true);
 
-        const newLabel = $('<div></div>')
-          .html(Math.round(row.profit))
-          .addClass('label')
-          .addClass('label-default');
-        newDiv.append(newLabel);
+          const newLabel = $('<div></div>')
+            .html(Math.round(row.profit))
+            .addClass('label')
+            .addClass('label-default');
+          newDiv.append(newLabel);
 
-        // const newB = $('<button></button')
-        //   .text('Details')
-        //   .addClass('btn')
-        //   .addClass('btn-default')
-        //   .addClass('btn-xs');
-        // newDiv.append(newB); 
+          // const newB = $('<button></button')
+          //   .text('Details')
+          //   .addClass('btn')
+          //   .addClass('btn-default')
+          //   .addClass('btn-xs');
+          // newDiv.append(newB); 
 
+        });
+
+        // draw histogram
+        d3.select("#histogram")
+          .datum(results.map(a => a.profit))
+          .call(histogramChart()
+          .bins(20)
+          .tickFormat(d3.format(".02f")));
+
+        const summaryChartsHeight = 300;
+        // draw other line charts
+        const salesChart = new LineChart(summaryChartsHeight, T, N, d3.select('#avgInventory'), 'Time', 'Items');
+        simulation.all.inventory.forEach( x => salesChart.drawLine(x, false));
+        salesChart.drawLine(simulation.averages.inventory, true); 
+
+        const priceChart = new LineChart(summaryChartsHeight, T, price_max, d3.select('#avgPrices'), 'Time', 'Price');
+        simulation.all.price.forEach( x => priceChart.drawLine(x, false));
+        priceChart.drawLine(simulation.averages.price, true);
+
+        const endProbabilityChart = new LineChart(summaryChartsHeight, T, 1, d3.select('#endProbability'), 'Time', 'Probability');
+        endProbabilityChart.drawLine(simulation.averages.end_probability, true);
+
+        const maxProfitGuess = simulation.averages.profit[simulation.averages.profit.length - 1] * 1.5;
+        const profitChart = new LineChart(summaryChartsHeight, T, maxProfitGuess, d3.select('#avgProfit'), 'Time', 'Profit');
+        simulation.all.profit.forEach( x => profitChart.drawLine(x, false));
+        profitChart.drawLine(simulation.averages.profit, true); 
+
+        d3.selectAll('.axis').moveToFront();
+
+      })
+      .catch((err) => {
+        $('#diagrams').html('<p><strong>Error:</strong> ' + err + '</p><pre>' + err.stack + '</pre>');
       });
-
-      // draw histogram
-      d3.select("#histogram")
-        .datum(results.map(a => a.profit))
-        .call(histogramChart()
-        .bins(20)
-        .tickFormat(d3.format(".02f")));
-
-      const summaryChartsHeight = 300;
-      // draw other line charts
-      const salesChart = new LineChart(summaryChartsHeight, T, N, d3.select('#avgInventory'), 'Time', 'Items');
-      simulation.all.inventory.forEach( x => salesChart.drawLine(x, false));
-      salesChart.drawLine(simulation.averages.inventory, true); 
-
-      const priceChart = new LineChart(summaryChartsHeight, T, price_max, d3.select('#avgPrices'), 'Time', 'Price');
-      simulation.all.price.forEach( x => priceChart.drawLine(x, false));
-      priceChart.drawLine(simulation.averages.price, true);
-
-      const endProbabilityChart = new LineChart(summaryChartsHeight, T, 1, d3.select('#endProbability'), 'Time', 'Probability');
-      endProbabilityChart.drawLine(simulation.averages.end_probability, true);
-
-      const maxProfitGuess = simulation.averages.profit[simulation.averages.profit.length - 1] * 1.5;
-      const profitChart = new LineChart(summaryChartsHeight, T, maxProfitGuess, d3.select('#avgProfit'), 'Time', 'Profit');
-      simulation.all.profit.forEach( x => profitChart.drawLine(x, false));
-      profitChart.drawLine(simulation.averages.profit, true); 
-
-      d3.selectAll('.axis').moveToFront();
-
-    });
+  }, 1);
 }
 
-function makeFunc(pts) {
+function makeDrawableGraph(pts) {
   let points = pts.slice(0);
   let dragged;
   let selected;
 
-  function chooseStuff(selectorString, yLabel, maxY = 1) {
+  function doAction(selectorString, yLabel, maxY = 1) {
     const margin = { top: 30, right: 30, bottom: 30, left: 30 };
 
     let width = $(selectorString).width() - margin.left - margin.right;
@@ -435,7 +445,6 @@ function makeFunc(pts) {
     let svg = d3.select(selectorString).append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom);
-        // .attr("tabindex", 1);
 
     svg.append("rect")
         .attr("width", width + margin.left + margin.right)
@@ -483,9 +492,6 @@ function makeFunc(pts) {
     function redraw() {
 
       points = pointsCoordinates.map(p => [x.invert(p[0]), y.invert(p[1])]);
-
-      console.log(points);
-
       svg.select("path").attr("d", line);
 
       let circle = svg.selectAll("circle")
@@ -508,7 +514,6 @@ function makeFunc(pts) {
         d3.event.preventDefault();
         d3.event.stopPropagation();
       }
-    }
 
     function mousemove() {
       if (!dragged) return;
@@ -525,19 +530,19 @@ function makeFunc(pts) {
     }
 
   }
-  return chooseStuff;
+  return doAction;
 }
 
 
 
 $(document).ready(function() {
   const salesPoints = [[0.01, 2], [1/3, 4], [2/3, 6], [1, 8]];
-  let bla = makeFunc(salesPoints);
-  bla('#userDrawGraph', '#maxSales', 10);
+  let drawableMaxSalesGraph = makeDrawableGraph(salesPoints);
+  drawableMaxSalesGraph('#userDrawGraph', '#maxSales', 10);
 
   let rankPoints = [[0.01, .2], [1/3, .4], [2/3, .6], [1, .8]];
-  let blub = makeFunc(rankPoints);
-  blub('#userDrawGraph2', 'max rank to sell');
+  let drawAbleRankGraph = makeDrawableGraph(rankPoints);
+  drawAbleRankGraph('#userDrawGraph2', 'max rank to sell');
 
 
   setTimeout(() => {
