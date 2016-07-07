@@ -87,6 +87,35 @@
 			    from { -webkit-transform: rotate(0deg); }
 			    to { -webkit-transform: rotate(360deg); }
 			}
+
+			#userDrawGraph rect {
+			  fill: none;
+			  pointer-events: all;
+			}
+
+			#userDrawGraph circle, #userDrawGraph .line {
+			  fill: none;
+			  stroke: steelblue;
+			  stroke-width: 1.5px;
+			}
+
+			#userDrawGraph circle {
+			  fill: #fff;
+			  fill-opacity: .2;
+			  cursor: move;
+			}
+
+			#userDrawGraph .axis path,
+			#userDrawGraph .axis line {
+			  fill: none;
+			  stroke: #000;
+			  shape-rendering: crispEdges;
+			}
+/*
+			#userDrawGraph .selected {
+			  fill: #ff7f0e;
+			  stroke: #ff7f0e;
+			}*/
 		</style>
 	</head>
 	<body>
@@ -95,6 +124,7 @@
 		  	<h1>Dynamic pricing<br><small>for selling perishable products in a competitive environment</small></h1>
 			</div>
 			<div id="options_form"></div>
+			<div id="userDrawGraph"></div>
 			<div id="diagrams"></div>
 
 			<!-- D3 -->

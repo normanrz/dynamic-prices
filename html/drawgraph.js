@@ -391,7 +391,131 @@ function fetchAll(options) {
     });
 }
 
+let points = [[0.01, 2], [1/3, 4], [2/3, 6], [1, 8]];
+function chooseStuff() {
+  const margin = { top: 30, right: 30, bottom: 30, left: 30 };
+
+  var width = 960 - margin.left - margin.right;
+  var height = 500  - margin.top - margin.bottom;
+
+  var x = d3.scale.linear()
+    .range([0, width]);
+  var y = d3.scale.linear()
+    .domain([0, 10])
+    .range([height, 0]);
+
+  let pointsCoordinates = []
+  for(let i = 0; i < points.length; i++) {
+    let p = points[i];
+    let pC = []
+    pC.push(x(p[0]));
+    pC.push(y(p[1]));
+    pointsCoordinates.push(pC);
+  }
+
+  var dragged = null,
+      selected = pointsCoordinates[0];
+
+  var line = d3.svg.line().interpolate('basis');
+
+  var svg = d3.select("#userDrawGraph").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .attr("tabindex", 1);
+
+  svg.append("rect")
+      .attr("width", width)
+      .attr("height", height);
+
+  svg.append("path")
+      .datum(pointsCoordinates)
+      .attr("class", "line")
+      .call(redraw);
+
+  const xAxis = d3.svg.axis()
+    .scale(x)
+    .orient('bottom');
+
+  const yAxis = d3.svg.axis()
+    .scale(y)
+    .orient('left');
+
+  svg.append('g')
+    .attr('class', 'axis')
+    .attr('transform', `translate(0, ${(height - 0)})`)
+    .call(xAxis)
+  .append('text')
+    .attr('x', width)
+    .attr('dy', '-.71em')
+    .style('text-anchor', 'end')
+    .text('time');
+
+  svg.append('g')
+    .attr('class', 'axis')
+    // .attr('transform', 'translate(${margin.left},0)')
+    .call(yAxis)
+  .append('text')
+    .attr('transform', 'rotate(-90)')
+    .attr('y', 6)
+    .attr('dy', '.71em')
+    .style('text-anchor', 'end')
+    .text('#sales');
+
+  d3.select(window)
+      .on("mousemove", mousemove)
+      .on("mouseup", mouseup);
+
+  svg.node().focus();
+
+  function redraw() {
+
+    points = pointsCoordinates.map(p => [x.invert(p[0]), y.invert(p[1])]);
+
+    console.log(points);
+
+    svg.select("path").attr("d", line);
+
+    var circle = svg.selectAll("circle")
+        .data(pointsCoordinates, function(d) { return d; });
+
+    circle.enter().append("circle")
+        .attr("r", 1e-6)
+        .on("mousedown", function(d) { selected = dragged = d; redraw(); })
+      .transition()
+        .duration(750)
+        .ease("elastic")
+        .attr("r", 6.5);
+
+    circle
+        .classed("selected", function(d) { return d === selected; })
+        .attr("cx", function(d) { return d[0]; })
+        .attr("cy", function(d) { return d[1]; });
+
+    if (d3.event) {
+      d3.event.preventDefault();
+      d3.event.stopPropagation();
+    }
+  }
+
+  function mousemove() {
+    if (!dragged) return;
+    var m = d3.mouse(svg.node());
+    // dragged[0] = Math.max(0, Math.min(width, m[0]));
+    dragged[1] = Math.max(0, Math.min(height, m[1]));
+    redraw();
+  }
+
+  function mouseup() {
+    if (!dragged) return;
+    mousemove();
+    dragged = null;
+  }
+
+}
+
 $(document).ready(function() {
+  chooseStuff();
+
   setTimeout(() => {
     let reactForm = ReactDOM.render(
       React.createElement(OptionsForm, { onSubmit: fetchAll }),
