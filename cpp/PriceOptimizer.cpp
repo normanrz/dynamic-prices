@@ -81,6 +81,7 @@ class PriceOptimizer {
     std::vector<double> sales_model_coef = {};
     PricePair run(int, int);
     double sales_model(double, int);
+    static std::vector<double> make_x(double, const std::vector<double> &, int, int);
 
   private:
     Grid<PricePair> cache;
@@ -154,18 +155,18 @@ std::pair<double, double> PriceOptimizer::run(int t, int n) {
   return V(t, n);
 }
 
-double PriceOptimizer::sales_model(double price, int t) {
+std::vector<double> PriceOptimizer::make_x(double price, const std::vector<double> & competitor_prices, int t, int T) {
   double _t = double(t) / T;
   double _rank = double(rank(price, competitor_prices)) / competitor_prices.size();
   std::vector<double> x = {
     1,
-    double(rank(price, competitor_prices)),
+    double(_rank),
     price - *std::min_element(competitor_prices.begin(), competitor_prices.end()),
     price,
-    double(t),
-    double(t * t),
-    double(t * rank(price, competitor_prices)),
-    std::sqrt(t),
+    double(_t),
+    double(_t * _t),
+    double(_t * _rank),
+    std::sqrt(_t),
     double((1 - _t) * (1 - _t) * (1 - _t)),
     double(_t * (1 - _t) * (1 - _t)),
     double(_t * _t * (1 - _t)),
@@ -175,7 +176,10 @@ double PriceOptimizer::sales_model(double price, int t) {
     double(_rank * _rank * (1 - _rank)),
     double(_rank * _rank * _rank)
   };
-  // print_vec(x);
-  // std::cout << predict_linear_regression(x, sales_model_coef) << std::endl;
+  return x;
+}
+
+double PriceOptimizer::sales_model(double price, int t) {
+  auto x = make_x(price, competitor_prices, t, T);
   return predict_linear_regression(x, sales_model_coef);
 }
