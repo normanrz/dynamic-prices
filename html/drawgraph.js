@@ -83,24 +83,41 @@ class LineChart {
     let color = 'whitesmoke';
     if (primary) color = 'grey';
 
-    this.svg.append('path')
+    function mouseOut() {
+      if (primary) return;
+      d3.select(this).attr('stroke', 'whitesmoke');
+      if (self._primaryLine) self._primaryLine.moveToFront();
+    }
+    function mouseOver() {
+      if (primary) return;
+      d3.select(this).attr('stroke', 'black').moveToFront();
+    }
+
+    let line = this.svg.append('path')
       .attr('class', 'line')
       .attr('stroke', color)
       .on('mousemove', mouseMove)
+      .on('mouseover', mouseOver)
+      .on('mouseout', mouseOut)
       .attr('d', this.line(prices));
+
+    if (primary) {
+      this._primaryLine = line;
     }
+  }
+
 }
 
 class PricingPolicyChart extends LineChart {
   drawLine(prices, n) {
     function mouseOver() {
       let focusLine = d3.select(this)
-        .attr('stroke', 'grey')
+        .attr('stroke', 'black')
         .moveToFront();
 
       $(`#selectN div[n='${focusLine.attr('id')}'`)
         .css('color', 'white')
-        .css('background-color', 'grey');
+        .css('background-color', 'black');
       console.log(n);
       $("#selectN").scrollTop($("#selectN").scrollTop() + $(`#selectN div[n='${focusLine.attr('id')}'`).position().top - 150 );
 
@@ -294,7 +311,7 @@ function fetchAll(options) {
             <h4>Select N</h4><div id="selectN"></div>
           </div>
         </div>
-        <h3 class="text-center">Profits summary</h3>
+        <h3 class="text-center">Simulation summary</h3>
         <div class="row">
           <div class="col-md-6">
             <h4 class="text-center">Average Prices</h4>
