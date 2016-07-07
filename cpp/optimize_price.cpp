@@ -7,6 +7,19 @@
 #include "PriceOptimizer.cpp"
 using namespace boost::python;
 
+class ReleaseGIL {
+public:
+  inline ReleaseGIL() {
+    save_state = PyEval_SaveThread();
+  }
+
+  inline ~ReleaseGIL() {
+    PyEval_RestoreThread(save_state);
+  }
+private:
+  PyThreadState *save_state;
+};
+
 std::vector<double> ndarray_to_vector(const numeric::array& l) {
   std::vector<double> result;
   for (int i = 0; i < len(l); ++i) {
@@ -29,12 +42,14 @@ void set_sales_model_coef(PriceOptimizer* self, const numeric::array& l) {
 void noop(PriceOptimizer * self) {}
 
 tuple run(PriceOptimizer * self, int t, int n) {
+  auto unlockGIL = ReleaseGIL();
   auto price_pair = self->run(t, n);
   return make_tuple(price_pair.first, price_pair.second);
 }
 
 BOOST_PYTHON_MODULE(optimize_price)
 {
+  PyEval_InitThreads();
   numeric::array::set_module_and_type("numpy", "ndarray");
 
   class_<PriceOptimizer>("PriceOptimizer", init<int, int>())

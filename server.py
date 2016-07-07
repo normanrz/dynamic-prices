@@ -5,6 +5,8 @@ from os import path
 from data import make_model, generate_train_data, change_competitor_prices
 from cpp.optimize_price import PriceOptimizer
 import numpy as np
+from concurrent.futures import ThreadPoolExecutor
+
 
 static_assets_path = path.join(path.dirname(__file__), "html")
 app = Flask(__name__, static_folder=static_assets_path)
@@ -24,6 +26,7 @@ def make_price_optimizer(competitor_prices,
   po.price_range = price_range
   po.sales_model_coef = sales_model_coef
   po.competitor_prices = competitor_prices
+  po.run(0, 0)
   return po
 
 
@@ -38,9 +41,12 @@ def run_simulations(inital_competitor_prices, iterations, initial_optimizer,
   inventory_history = np.zeros((iterations, T))
 
   competitor_prices = change_competitor_prices(inital_competitor_prices)
-  optimizers = [make_price_optimizer(new_prices, T, N, price_range, L, delta, Z, time_model) 
-    for new_prices in competitor_prices]
 
+  optimizers = list(ThreadPoolExecutor(max_workers=8).map(
+    lambda new_prices: make_price_optimizer(new_prices, T, N, price_range, L, delta, Z, time_model),
+    competitor_prices
+  ))
+  
   for i in range(iterations):
 
     price_level = 0

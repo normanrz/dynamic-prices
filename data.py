@@ -38,7 +38,7 @@ def generate_train_data(B, T, price_range, time_model):
             X[index,:] = x
 
             _rank = rank(our_price[index], competitor_prices[index])
-            y = 5 * (time_model[0] * x[7] + time_model[1] * 3 * x[8] + time_model[2] * 3 * x[9] + time_model[3] * x[10]) + \
+            y = (time_model[0] * x[7] + time_model[1] * 3 * x[8] + time_model[2] * 3 * x[9] + time_model[3] * x[10]) + \
                 2 * (competitor_prices.shape[1] - _rank - 1)
             Y[index] = y * np.random.uniform(0, 1)
 

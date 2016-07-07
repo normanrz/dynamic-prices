@@ -67,7 +67,6 @@ class OptionsForm extends React.Component {
     return <form onSubmit={e => {
       e.preventDefault();
       this.props.onSubmit(this.state);
-      $('#diagrams').html('<span class="glyphicon glyphicon-refresh spinning" aria-hidden="true"></span>');
     }}>
       <div className="row">
         <NumericInput 
