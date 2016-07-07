@@ -4,7 +4,10 @@ d3.selection.prototype.moveToFront = function() {
   });
 };
 
-let points = {'time': [[0.01, 1], [1/3, 2], [2/3, 3], [1, 4]], 'rank': [[0.01, 1], [1/3, 2], [2/3, 3], [1, 4]]}
+let points = {
+  time: [[0.01, 1], [1/3, 1.5], [2/3, 3], [1, 7]],
+  rank: [[0.01, 4], [1/3, 2], [2/3, 0], [1, -3]],
+};
 
 const tooltip = d3.select('body').append('div') 
   .attr('class', 'tooltip')       
@@ -423,7 +426,7 @@ function fetchAll(options) {
   }, 1);
 }
 
-function makeDrawableGraph(pointsAttr, selectorString, xLabel, yLabel, maxY = 1) {
+function makeDrawableGraph(pointsAttr, selectorString, xLabel, yLabel, rangeY = [0, 1]) {
   let dragged;
   let selected;
 
@@ -435,7 +438,7 @@ function makeDrawableGraph(pointsAttr, selectorString, xLabel, yLabel, maxY = 1)
   let x = d3.scale.linear()
     .range([margin.left, width]);
   let y = d3.scale.linear()
-    .domain([0, maxY])
+    .domain(rangeY)
     .range([height,0]);
 
   let pointsCoordinates = points[pointsAttr].map(p => [x(p[0]), y(p[1])]);
@@ -535,8 +538,8 @@ function makeDrawableGraph(pointsAttr, selectorString, xLabel, yLabel, maxY = 1)
 }
 
 $(document).ready(function() {
-  makeDrawableGraph('time' ,'#userDrawGraph', 'time', '# max Sales', 10);
-  makeDrawableGraph('rank', '#userDrawGraph2', 'rank', '# max Sales', 10);
+  makeDrawableGraph('time' ,'#userDrawGraph', 'time', '# max Sales', [0, 16]);
+  makeDrawableGraph('rank', '#userDrawGraph2', 'rank', '# max Sales', [-5, 5]);
 
   setTimeout(() => {
     let reactForm = ReactDOM.render(
