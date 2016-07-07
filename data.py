@@ -1,51 +1,47 @@
 import numpy as np
 from sklearn import linear_model
+from timeit import default_timer as timer
 
-# Generate training data for sales probability regression
 def rank(a, p):
-    _rank = p.shape[0]
-    for i in range(p.shape[0]):
-        if a < p[i]:
-            _rank = _rank - 1
-    return _rank
+    array = np.hstack((a.reshape(-1, 1), p))
+    order = array.argsort(axis=1)
+    ranks = order.argsort(axis=1)
+    return ranks[:, 0]
 
 def make_X(price, competitor_prices, t, T):
+    ranks = rank(price, competitor_prices)
+    _ranks = ranks / competitor_prices.shape[1]
     _t = t / T
-    _rank = rank(price, competitor_prices) / competitor_prices.shape[0];
-    return np.array([
-            rank(price, competitor_prices),
-            price - competitor_prices.min(),
-            price,
-            t,
-            t * t,
-            t * rank(price, competitor_prices),
-            np.sqrt(t),
-            (1 - _t) * (1 - _t) * (1 - _t),
-            _t * (1 - _t) * (1 - _t),
-            _t * _t * (1 - _t),
-            _t * _t * _t,
-            (1 - _rank) * (1 - _rank) * (1 - _rank),
-            _rank * (1 - _rank) * (1 - _rank),
-            _rank * _rank * (1 - _rank),
-            _rank * _rank * _rank
-        ])
+
+    return np.vstack((
+        _ranks,
+        price - competitor_prices.min(axis=1),
+        price,
+        _t,
+        _t * _t,
+        _t * _ranks,
+        np.sqrt(_t),
+        (1 - _t) * (1 - _t) * (1 - _t),
+        _t * (1 - _t) * (1 - _t),
+        _t * _t * (1 - _t),
+        _t * _t * _t,
+        (1 - _ranks) * (1 - _ranks) * (1 - _ranks),
+        _ranks * (1 - _ranks) * (1 - _ranks),
+        _ranks * _ranks * (1 - _ranks),
+        _ranks * _ranks * _ranks
+    )).transpose()
 
 def generate_train_data(B, T, price_range, time_model, rank_model):
-    our_price = np.random.choice(price_range, (B * T, 1))
+    our_price = np.random.choice(price_range, B * T)
     competitor_prices = np.random.choice(price_range, (B * T, 3))
-    
-    X = np.zeros((B * T, 15))
-    Y = np.zeros(B * T)
-    for t in range(T):
-        for i in range(B):
-            index = t * B + i
-            x = make_X(our_price[index], competitor_prices[index], t, T)
-            X[index,:] = x
 
-            _rank = rank(our_price[index], competitor_prices[index])
-            y = (time_model[0] * x[7] + time_model[1] * 3 * x[8] + time_model[2] * 3 * x[9] + time_model[3] * x[10]) + \
-                (rank_model[0] * x[11] + rank_model[1] * 3 * x[12] + rank_model[2] * 3 * x[13] + rank_model[3] * x[14])
-            Y[index] = y * np.random.uniform(0, 1)
+    X = make_X(our_price, competitor_prices, np.repeat(np.arange(0, T), B), T)
+    Y = (
+            time_model[0] * X[:, 7] + time_model[1] * 3 * X[:, 8] + 
+            time_model[2] * 3 * X[:, 9] + time_model[3] * X[:, 10] + 
+            rank_model[0] * X[:, 11] + rank_model[1] * 3 * X[:, 12] + 
+            rank_model[2] * 3 * X[:, 13] + rank_model[3] * X[:, 14]
+        ) * np.random.uniform(0, 1, B * T)
 
     return (X, Y)
 

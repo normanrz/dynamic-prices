@@ -42,7 +42,7 @@ def run_simulations(inital_competitor_prices, iterations, initial_optimizer,
 
   competitor_prices = change_competitor_prices(inital_competitor_prices)
 
-  optimizers = list(ThreadPoolExecutor(max_workers=8).map(
+  optimizers = list(ThreadPoolExecutor(max_workers=4).map(
     lambda new_prices: make_price_optimizer(new_prices, T, N, price_range, L, delta, Z, time_model, rank_model),
     competitor_prices
   ))
@@ -115,8 +115,8 @@ def simulations():
   price_step = options['price_step']
   price_range = np.arange(price_min, price_max, price_step, dtype=np.float64)
   iterations = options['counts']
-  time_model = options['time_model']
-  rank_model = options['rank_model']
+  time_model = np.array(options['time_model'], dtype=np.float64)
+  rank_model = np.array(options['rank_model'], dtype=np.float64)
 
   po = make_price_optimizer(competitor_prices, T, N, price_range, L, delta, Z, time_model, rank_model)
   result = {
