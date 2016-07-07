@@ -533,7 +533,7 @@ function makeDrawableGraph(pointsAttr, selectorString, xLabel, yLabel, rangeY = 
 }
 
 $(document).ready(function() {
-  makeDrawableGraph('time' ,'#userDrawGraph', 'time', '# max Sales', [0, 15]);
+  makeDrawableGraph('time' ,'#userDrawGraph', 'time', '# max Sales', [0, 16]);
   makeDrawableGraph('rank', '#userDrawGraph2', 'rank', '# max Sales', [-5, 5]);
 
   setTimeout(() => {
