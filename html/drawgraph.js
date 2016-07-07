@@ -4,7 +4,7 @@ d3.selection.prototype.moveToFront = function() {
   });
 };
 
-let points = {'sales': [[0.01, 2], [1/3, 4], [2/3, 6], [1, 8]], 'rank': [[0.01, .2], [1/3, .4], [2/3, .6], [1, .8]]}
+let points = {'time': [[0.01, 1], [1/3, 2], [2/3, 3], [1, 4]], 'rank': [[0.01, 1], [1/3, 2], [2/3, 3], [1, 4]]}
 
 const tooltip = d3.select('body').append('div') 
   .attr('class', 'tooltip')       
@@ -295,11 +295,8 @@ function histogramChart() {
 
 function fetchAll(options) {
   let { T, N, price_max, counts } = options;
-  options.time_model = points.sales.map(a => a[1]);
+  options.time_model = points.time.map(a => a[1]);
   options.rank_model = points.rank.map(a => a[1]);
-
-  console.log(points.sales[1][1]);
-  console.log(points.rank[1][1]);
 
   $('#diagrams').html('<span class="glyphicon glyphicon-refresh spinning" aria-hidden="true"></span>');
   setTimeout(function () {
@@ -320,18 +317,18 @@ function fetchAll(options) {
               <h4>Select N</h4><div id="selectN"></div>
             </div>
           </div>
-          <h3 class="text-center">Simulation summary</h3>
+          <h3 class="text-center">Simulation Summary</h3>
           <div class="row">
             <div class="col-md-6">
-              <h4 class="text-center">Average Prices</h4>
+              <h4 class="text-center">Prices</h4>
               <div class="row" id="avgPrices"></div>
             </div>
             <div class="col-md-6">
-              <h4 class="text-center">Average Inventory</h4>
+              <h4 class="text-center">Inventory</h4>
               <div class="row" id="avgInventory"></div>
             </div>
             <div class="col-md-6">
-              <h4 class="text-center">Average Profit</h4>
+              <h4 class="text-center">Profit</h4>
               <div class="row" id="avgProfit"></div>
             </div>
             <div class="col-md-6">
@@ -339,7 +336,7 @@ function fetchAll(options) {
               <div class="row" id="endProbability"></div>
             </div>
           </div>
-          <h4 class="text-center">Profit histogram</h4>
+          <h4 class="text-center">Profit Histogram</h4>
           <div class="row" id="histogram"></div>
           <h3 class="text-center">Simulations</h3> 
           <div class="row" id="sim"></div>`);
@@ -421,7 +418,7 @@ function fetchAll(options) {
   }, 1);
 }
 
-function makeDrawableGraph(pointsAttr, selectorString, yLabel, maxY = 1) {
+function makeDrawableGraph(pointsAttr, selectorString, xLabel, yLabel, maxY = 1) {
   let dragged;
   let selected;
 
@@ -458,6 +455,7 @@ function makeDrawableGraph(pointsAttr, selectorString, yLabel, maxY = 1) {
 
   const xAxis = d3.svg.axis()
     .scale(x)
+    .ticks(1)
     .orient('bottom');
 
   const yAxis = d3.svg.axis()
@@ -472,7 +470,7 @@ function makeDrawableGraph(pointsAttr, selectorString, yLabel, maxY = 1) {
     .attr('x', width)
     .attr('dy', '-.71em')
     .style('text-anchor', 'end')
-    .text('time');
+    .text(xLabel);
 
   svg.append('g')
     .attr('class', 'axis')
@@ -532,8 +530,8 @@ function makeDrawableGraph(pointsAttr, selectorString, yLabel, maxY = 1) {
 }
 
 $(document).ready(function() {
-  makeDrawableGraph('sales' ,'#userDrawGraph', '#maxSales', 10);
-  makeDrawableGraph('rank', '#userDrawGraph2', 'max rank to sell');
+  makeDrawableGraph('time' ,'#userDrawGraph', 'time', '# max Sales', 10);
+  makeDrawableGraph('rank', '#userDrawGraph2', 'rank', '# max Sales', 10);
 
   setTimeout(() => {
     let reactForm = ReactDOM.render(
