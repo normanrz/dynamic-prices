@@ -514,6 +514,7 @@ function makeDrawableGraph(pts) {
         d3.event.preventDefault();
         d3.event.stopPropagation();
       }
+    }
 
     function mousemove() {
       if (!dragged) return;
