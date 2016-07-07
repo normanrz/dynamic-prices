@@ -2,7 +2,7 @@
 from flask import Flask, Response, request, send_from_directory
 import json
 from os import path
-from data import make_model, generate_train_data
+from data import make_model, generate_train_data, change_competitor_prices
 from cpp.optimize_price import PriceOptimizer
 import numpy as np
 
@@ -13,54 +13,56 @@ def mean(l):
   _l = list(l)
   return sum(_l) / len(_l)
 
-competitor_prices = np.array([11, 13, 14], dtype=np.float64)
 def make_price_optimizer(competitor_prices,
-    T=20, N=15,
-    price_range=np.arange(10, 20, 0.1), 
-    L=0.01, delta=0.99, Z=0.5):
+    T, N, price_range, L, delta, Z):
+
   _, sales_model_coef = make_model(*generate_train_data(1000, T, price_range))
   po = PriceOptimizer(T, N)
   po.L = L
   po.Z = Z
   po.delta = delta
   po.price_range = price_range
-  po.competitor_prices = competitor_prices
   po.sales_model_coef = sales_model_coef
+  po.competitor_prices = competitor_prices
   return po
 
-def run_simulations(iterations, T, N, L, Z, delta, price_range):
+
+def run_simulations(inital_competitor_prices, iterations, initial_optimizer, 
+    T, N, price_range, L, delta, Z):
 
   results = []
-  optimizer = make_price_optimizer(competitor_prices, T=T, N=N, Z=Z, L=L, delta=delta, price_range=price_range)
-
-  L = optimizer.L
-  Z = optimizer.Z
 
   price_history = np.zeros((iterations, T))
   profit_history = np.zeros((iterations, T))
-  competitor_prices_history = np.zeros((iterations, T, competitor_prices.size))
+  competitor_prices_history = np.zeros((iterations, T, inital_competitor_prices.size))
   inventory_history = np.zeros((iterations, T))
-  
+
+  competitor_prices = change_competitor_prices(inital_competitor_prices)
+  optimizers = [make_price_optimizer(new_prices, T, N, price_range, L, delta, Z) 
+    for new_prices in competitor_prices]
+
   for i in range(iterations):
+
+    price_level = 0
 
     profit = 0
     n = N
     
     for t in range(0, T):
-      price, V = optimizer.run(t, n)
-      pi = optimizer.sales_model(price, t)
+      price, _ = optimizers[price_level].run(t, n)
+      pi = optimizers[price_level].sales_model(price, t)
       sales = min(n, np.random.poisson(pi))
       n = n - sales
       profit += price * sales - L * n
 
       price_history[i,t] = price
       inventory_history[i,t] = n
-      competitor_prices_history[i,t,:] = competitor_prices
+      competitor_prices_history[i,t,:] = competitor_prices[price_level]
       profit_history[i,t] = profit
 
-      # # Change competitor prices
-      # competitor_prices = competitor_prices * np.random.uniform(0.8, 1.2, 5)
-      # optimizer = PriceOptimizer(sales_model, competitor_prices, N=n, T=T, L=L, Z=Z)
+      # Change competitor prices
+      if np.random.uniform(0, 1) > 0.9:
+        price_level = min(len(optimizers) - 1, price_level + 1)
 
     # Realize salvage profits
     profit += n * Z
@@ -100,6 +102,7 @@ def simulations():
   N = options['N']
   Z = options['Z']
   L = options['L']
+  competitor_prices = np.array(options['competitors'], dtype=np.float64)
   delta = options['delta']
   price_min = options['price_min']
   price_max = options['price_max']
@@ -107,13 +110,13 @@ def simulations():
   price_range = np.arange(price_min, price_max, price_step, dtype=np.float64)
   iterations = options['counts']
 
-  po = make_price_optimizer(competitor_prices, T=T, N=N, Z=Z, L=L, delta=delta, price_range=price_range)
+  po = make_price_optimizer(competitor_prices, T, N, price_range, L, delta, Z)
   result = {
     'policy': list(map(lambda n: { 
         'n': n, 
         'prices': list(map(lambda t: po.run(t, n)[0], range(1, T + 1)))
       }, range(1, N + 1))),
-    'simulation': run_simulations(iterations, T=T, N=N, Z=Z, L=L, delta=delta, price_range=price_range)
+    'simulation': run_simulations(competitor_prices, iterations, po, T, N, price_range, L, delta, Z)
   }
   return Response(json.dumps(result),  mimetype='application/json')
 
