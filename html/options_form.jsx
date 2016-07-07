@@ -78,16 +78,19 @@ class OptionsForm extends React.Component {
         <NumericInput 
           label="Salvage Profit (Z)"
           value={this.state.Z}
+          step={0.1}
           onChange={this.makeChangeHandler('Z')}
         />
         <NumericInput 
           label="Storage Cost (L)"
           value={this.state.L}
+          step={0.1}
           onChange={this.makeChangeHandler('L')}
         />
         <NumericInput 
           label="Discount Factor (Δ)"
           value={this.state.delta}
+          step={0.1}
           onChange={this.makeChangeHandler('delta')}
         />
         <NumericInput 
@@ -103,6 +106,7 @@ class OptionsForm extends React.Component {
         <NumericInput 
           label="Price Steps"
           value={this.state.price_step}
+          step={0.1}
           onChange={this.makeChangeHandler('price_step')}
         />
       </div>
