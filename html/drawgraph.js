@@ -420,23 +420,16 @@ function fetchAll(options) {
 function chooseStuff() {
   const margin = { top: 30, right: 30, bottom: 30, left: 30 };
 
-  var width = 960 - margin.left - margin.right;
-  var height = 500  - margin.top - margin.bottom;
+  var width = $('#userDrawGraph').width() - margin.left - margin.right;
+  var height = 300  - margin.top - margin.bottom;
 
   var x = d3.scale.linear()
-    .range([0, width]);
+    .range([margin.left, width]);
   var y = d3.scale.linear()
     .domain([0, 10])
-    .range([height, 0]);
+    .range([height,0]);
 
-  let pointsCoordinates = []
-  for(let i = 0; i < points.length; i++) {
-    let p = points[i];
-    let pC = []
-    pC.push(x(p[0]));
-    pC.push(y(p[1]));
-    pointsCoordinates.push(pC);
-  }
+  pointsCoordinates = points.map(p => [x(p[0]), y(p[1])]);
 
   var dragged = null,
       selected = pointsCoordinates[0];
@@ -445,12 +438,12 @@ function chooseStuff() {
 
   var svg = d3.select("#userDrawGraph").append("svg")
       .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .attr("tabindex", 1);
+      .attr("height", height + margin.top + margin.bottom);
+      // .attr("tabindex", 1);
 
   svg.append("rect")
-      .attr("width", width)
-      .attr("height", height);
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
 
   svg.append("path")
       .datum(pointsCoordinates)
@@ -467,7 +460,8 @@ function chooseStuff() {
 
   svg.append('g')
     .attr('class', 'axis')
-    .attr('transform', `translate(0, ${(height - 0)})`)
+    // .attr('transform', `translate(${margin.left}, ${(height + margin.top)})`)
+    .attr('transform', `translate(0, ${(height + 3)})`)
     .call(xAxis)
   .append('text')
     .attr('x', width)
@@ -477,7 +471,8 @@ function chooseStuff() {
 
   svg.append('g')
     .attr('class', 'axis')
-    // .attr('transform', 'translate(${margin.left},0)')
+    // .attr('transform', `translate(${margin.left}, 0)`)
+    .attr('transform', `translate(${margin.left}, 3)`)
     .call(yAxis)
   .append('text')
     .attr('transform', 'rotate(-90)')
@@ -490,7 +485,7 @@ function chooseStuff() {
       .on("mousemove", mousemove)
       .on("mouseup", mouseup);
 
-  svg.node().focus();
+  // svg.node().focus();
 
   function redraw() {
 
@@ -509,7 +504,7 @@ function chooseStuff() {
       .transition()
         .duration(750)
         .ease("elastic")
-        .attr("r", 6.5);
+        .attr("r", 5);
 
     circle
         .classed("selected", function(d) { return d === selected; })
