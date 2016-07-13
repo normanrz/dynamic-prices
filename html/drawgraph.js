@@ -48,16 +48,18 @@ class LineChart {
       .append('g')
       .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-    this.svg.append('g')
+    this.xAxisObject = this.svg.append('g')
       .attr('class', 'x axis')
       .attr('transform', `translate(-1, ${( + 1 + this.y(0))})`)
-      .call(xAxis)
-    .append('text')
-      .attr('x', this.width)
-      // .attr('x', this.width - 2 * this.width/xMax)
-      .attr('dy', '-.71em')
-      .style('text-anchor', 'end')
-      .text(xLabel);
+      .call(xAxis);
+
+    this.xAxisObject
+      .append('text')
+        .attr('x', this.width)
+        // .attr('x', this.width - 2 * this.width/xMax)
+        .attr('dy', '-.71em')
+        .style('text-anchor', 'end')
+        .text(xLabel);
 
     this.svg.append('g')
       .attr('class', 'y axis')
@@ -92,6 +94,9 @@ class LineChart {
       if (primary) return;
       d3.select(this).attr('stroke', 'lightgrey');
       if (self._primaryLine) self._primaryLine.moveToFront();
+
+
+      self.xAxisObject.moveToFront();
     }
     function mouseOver() {
       if (primary) return;
@@ -160,7 +165,7 @@ class PricingPolicyChart extends LineChart {
       const n = $(this).attr('n');
       const line = d3.select(`.line[id='${n}']`);
       line.moveToFront();
-      line.attr('stroke', 'grey');
+      line.attr('stroke', 'black');
     }
 
     function hoverOut() {
