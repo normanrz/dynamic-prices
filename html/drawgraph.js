@@ -85,12 +85,12 @@ class LineChart {
         .style('left', `${d3.event.pageX}px`)   
         .style('top', `${(d3.event.pageY - 20)}px`);        
     }
-    let color = 'whitesmoke';
+    let color = 'lightgrey';
     if (primary) color = 'grey';
 
     function mouseOut() {
       if (primary) return;
-      d3.select(this).attr('stroke', 'whitesmoke');
+      d3.select(this).attr('stroke', 'lightgrey');
       if (self._primaryLine) self._primaryLine.moveToFront();
     }
     function mouseOver() {
@@ -144,10 +144,10 @@ class PricingPolicyChart extends LineChart {
     }
 
     function mouseOut() {
-      d3.select(this).attr('stroke', 'whitesmoke');
+      d3.select(this).attr('stroke', 'lightgrey');
       $('#selectN > div')
         .css('color', 'black')
-        .css('background-color', 'whitesmoke');
+        .css('background-color', 'lightgrey');
       tooltip.transition()
         .duration(100)
         .style('opacity', 0);
@@ -166,10 +166,10 @@ class PricingPolicyChart extends LineChart {
     function hoverOut() {
       $(this)
         .css('color', 'black')
-        .css('background-color', 'whitesmoke');
+        .css('background-color', 'lightgrey');
       const n = $(this).attr('n');
       const line = d3.select(`.line[id='${n}']`);
-      line.attr('stroke', 'whitesmoke');
+      line.attr('stroke', 'lightgrey');
     }
 
     this.data.push(prices);
@@ -177,14 +177,14 @@ class PricingPolicyChart extends LineChart {
       .text(n)
       .hover(hoverIn, hoverOut)
       .css('color', 'black')
-      .css('background-color', 'whitesmoke')
+      .css('background-color', 'lightgrey')
       .attr('n', n);
     $('#selectN').append(newDiv);
 
     this.svg.append('path')
       .attr('id', n)
       .attr('class', 'line')
-      .attr('stroke', 'whitesmoke')
+      .attr('stroke', 'lightgrey')
       .on('mouseover', mouseOver)
       .on('mouseout', mouseOut)
       .on('mousemove', mouseMove)
