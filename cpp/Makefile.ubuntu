@@ -1,0 +1,14 @@
+PYTHON_HOME=/usr/local/Cellar/python3/3.5.1/Frameworks/Python.framework/Versions/3.5
+
+optimize_price.so: optimize_price.cpp PriceOptimizer.cpp
+	$(CXX) -shared --std=c++11 \
+                optimize_price.cpp \
+                -Wl,--unresolved-symbols=report-all -Wl,--warn-unresolved-symbols \
+                -I/usr/include/python3.4m \
+		-I/usr/include \
+		-L/usr/lib \
+		-lpython3.4m \
+                -L/usr/lib/x86_64-linux-gnu \
+		-lboost_python-py34 \
+		-fpic \
+		-o optimize_price.so

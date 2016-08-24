@@ -1,6 +1,6 @@
 #include <vector>
 #include <utility>
-#include <python.h>
+#include <Python.h>
 #include <boost/python.hpp>
 #include <boost/python/numeric.hpp>
 #include <boost/python/tuple.hpp>
