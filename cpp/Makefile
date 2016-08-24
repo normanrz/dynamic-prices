@@ -2,6 +2,7 @@ PYTHON_HOME=/usr/local/Cellar/python3/3.5.1/Frameworks/Python.framework/Versions
 
 optimize_price.so: optimize_price.cpp PriceOptimizer.cpp
 	$(CXX) -shared --std=c++14 \
+		optimize_price.cpp \
 		-I$(PYTHON_HOME)/include/python3.5m \
 		-L$(PYTHON_HOME)/lib \
 		-I/usr/local/include \
@@ -9,4 +10,4 @@ optimize_price.so: optimize_price.cpp PriceOptimizer.cpp
 		-lpython3.5m \
 		-lboost_python3 \
 		-fpic \
-		optimize_price.cpp -o optimize_price.so
+		-o optimize_price.so

@@ -5,10 +5,10 @@ All functionality is available and configurable in a web-based dashboard.
 
 ## Install
 ### Dependencies
-* Python 3.5.1
-* Boost 1.60.0
-* Boost.Python 1.60.0
-* C++14 compiler
+* Python 3.4 or 3.5
+* Boost 1.55.0
+* Boost.Python 1.55.0
+* C++11 compiler (e.g. GCC4.8)
 * node.js + Bower
 
 ### Compile C++ module
@@ -21,6 +21,17 @@ make
 ```
 cd html
 bower install
+```
+
+### Install on Ubuntu 14.04
+```
+sudo apt-get install -y python3 python3-pip python3-numpy python3-scipy python3-dev libboost-python1.55.0 libboost-python1.55-dev
+sudo pip3 install sklearn flask
+curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+sudo apt-get install -y nodejs
+sudo npm i -g bower
+cd html && bower install && cd ..
+cd cpp && make -f Makefile.ubuntu && cd ..
 ```
 
 ## Run
