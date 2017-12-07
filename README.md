@@ -3,7 +3,13 @@
 This system provides a configurable demand estimation model, a calculation for optimal price strategies and a simulation runner.
 All functionality is available and configurable in a web-based dashboard.
 
-## Install
+## Install with Docker
+```
+docker build -t dynamic-prices .
+docker run -p8083:8083 dynamic-prices
+```
+
+## Install manually
 ### Dependencies
 * Python 3.4 or 3.5
 * Boost 1.55.0
@@ -39,4 +45,4 @@ cd cpp && make -f Makefile.ubuntu && cd ..
 python3 server.py
 ```
 
-The dashboard will be available at http://localhost:5000/
+The dashboard will be available at http://localhost:8083/
