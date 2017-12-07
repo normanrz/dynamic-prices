@@ -8,6 +8,7 @@ All functionality is available and configurable in a web-based dashboard.
 docker build -t dynamic-prices .
 docker run -p8083:8083 dynamic-prices
 ```
+The dashboard will be available at http://localhost:8083/
 
 ## Install manually
 ### Dependencies
